@@ -1,11 +1,11 @@
 {
-  "version": "0.1.1",
-  "notes": "Release v0.1.1\n\n- Release 0.1.1",
-  "pub_date": "2026-06-02T10:03:13.026Z",
+  "version": "0.1.2",
+  "notes": "Release v0.1.2\n\n- Add instant-save button to mode/style cards\n- Reduce default collections to 2, add right-click context menu\n- Apply accent theme colors broadly\n- Fix empty state duplication\n- Add cancel button to crop panel\n- Rename \"Screenshot\" to \"Select Image\"\n- Fix all plugin dynamic imports for production exe\n",
+  "pub_date": "2026-06-02T11:30:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRbWQvVzZtaTBqZ1EyT05kZnlBclUxdS9TK0NhMTdHd3diUDFmTHg1cmphSy82Vk1EeTIwM2ZpU2xEMGd2VVJ2cG00L3BaV1ZpL25XelRZNWMzWXlaMlZTWi9JWjFSN1FNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwMzk0NTgzCWZpbGU6SW1nMlByb21wdF8wLjEuMV94NjQtc2V0dXAuZXhlCjh6TWdqMHlzUTJTS1Q0a2c5OEYwOWxDN3lUMmc5d0h1QTI3QzU2NFpKSGl5L2wzS2lkL1FzL2R6cUkwb0VkbE9qUzZ3RVRxeU8xV01HMlFHRnFKekRBPT0K",
-      "url": "https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.1.1/Img2Prompt_0.1.1_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRbWQvVzZtaTBqZ2ZvT0VPbUdVUkN2NVMzK1JXZ1VjTGV1K1ZVVy80QWl1cFAvSWlNd216RlB6N1ZqVHhOQ1Budmt1Zzd2anRTL3hSelZvdHlHU1c3cU0xaWQxMHVQRlFZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwMzk2ODk3CWZpbGU6SW1nMlByb21wdF8wLjEuMl94NjQtc2V0dXAuZXhlCjhiSTBBWW9admo0aHlKOGhZMGtTRlVQWHhZdTZkZ05sS3dBVy9QZzZWaFl0OCt3NTNoQk9DY1o0ZHR3RmtOL0QzWlFXVWFPOE5VYmY2UG9lNzZiNUNBPT0K",
+      "url": "https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.1.2/Img2Prompt_0.1.2_x64-setup.exe"
     }
   }
 }
