@@ -1,11 +1,11 @@
 {
-  "version": "0.0.3",
-  "notes": "Initial release with updater support.\n\n- 4-icon sidebar navigation\n- Auto theme (follow system)\n- 3 style presets\n- Settings persistence fix\n- Version auto-increment",
-  "pub_date": "2026-06-02T00:00:00Z",
+  "version": "0.0.4",
+  "notes": "Update v0.0.4\n\n- Auto updater support\n- 4-icon sidebar navigation\n- Auto theme (follow system)\n- 3 editable style presets\n- Settings persistence fix\n- Version auto-increment on build",
+  "pub_date": "2026-06-02T09:10:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "PLACEHOLDER",
-      "url": "https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.0.3/Img2Prompt_0.0.3_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRbWQvVzZtaTBqZ2U0aUo3Y3p2SzU3UVlmNEJBN0k2allRRkViRlFsaWRzZC9FejYxSHJZVHJURE5TdUdZbHlwK3ZMRFlSL25wVTFReW00WnZUb1BHMUU1ZTJIUjltV3djPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwMzkxMTkwCWZpbGU6SW1nMlByb21wdF8wLjAuNF94NjQtc2V0dXAuZXhlCjhsZXNxNW1TWHRNY2syb3I2bVUxcFkvYWFjbXJscXdqb3ppeXhFN3lnMFFWNllGSFlQQnZ0bUJTdng1WnVscG9menpqaDF5OXpGV281RzVNMmNYWkJBPT0K",
+      "url": "https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.0.4/Img2Prompt_0.0.4_x64-setup.exe"
     }
   }
 }
