@@ -1,11 +1,9 @@
-{
-  "version": "0.0.6",
-  "notes": "Auto updater support. 4-icon sidebar. Theme defaults to auto. 3 style presets. Settings persistence fix. Version auto-increment.",
-  "pub_date": "2026-06-02T09:18:52Z",
-  "platforms": {
-    "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRbWQvVzZtaTBqZ2JRYUlRa0IrTDBRL3psUU83R3dIMzdmdHd2dVJweTNrM2FkMDcwcTBOVmhpVnQwSkF5SGpCSC9sSjdvcVBwSUZXdHZHV1BTVzRiVWM5WWlRTVpRckFRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwMzkxODYyCWZpbGU6SW1nMlByb21wdF8wLjAuNl94NjQtc2V0dXAuZXhlClRRYU5WSmgyUnJ3aFBGZ0RRdzE5d0Z5cHduM1k3azE0VTYwdVVNc0w1bTMyVFpXYTZHMUZ3dUJFNG9OanN6cXdwNVBHREtiY3MvOEROd3NFRmpWWkRRPT0K",
-      "url": "https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.0.6/Img2Prompt_0.0.6_x64-setup.exe"
-    }
-  }
-}
+{"version":"0.1.0","notes":"Release v0.1.0
+
+- Remove photography analysis mode; remove creative style preset
+- Fix feedback button with Tauri shell open
+- Add back/delete buttons to collection detail page
+- Fix empty state duplication on history page
+- Fix sidebar text alignment (text right after icon)
+- Implement OS drag-drop from file explorer
+- Auto-changelog in release flow","pub_date":"2026-06-02T09:57:48Z","platforms":{"windows-x86_64":{"signature":"dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRbWQvVzZtaTBqZ1NYREk3a2VCSytsaDFKS3RuUW11dFhMVzh4V1RpM3crdmtNWHg4QUFWajU3VkhyTmVoaEFWVTdrdzcrRlcrQnZGWXRNVEE3bHpQUHJ3VGdjZ0FRN0FJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwMzk0MTAwCWZpbGU6SW1nMlByb21wdF8wLjEuMF94NjQtc2V0dXAuZXhlCmRDZFFuWitFQU16ZS8zeHFZN1k2RjZKUWZFWjE4UzJWTlpudWp1a2NTdEpITjA2a05DZHlicno2ckxKdjQxM0lVUlFTY2lHSXdnR2xnVUkxblVLZkRRPT0K","url":"https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.1.0/Img2Prompt_0.1.0_x64-setup.exe"}}}
