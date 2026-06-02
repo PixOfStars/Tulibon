@@ -1,9 +1,11 @@
-{"version":"0.1.0","notes":"Release v0.1.0
-
-- Remove photography analysis mode; remove creative style preset
-- Fix feedback button with Tauri shell open
-- Add back/delete buttons to collection detail page
-- Fix empty state duplication on history page
-- Fix sidebar text alignment (text right after icon)
-- Implement OS drag-drop from file explorer
-- Auto-changelog in release flow","pub_date":"2026-06-02T09:57:48Z","platforms":{"windows-x86_64":{"signature":"dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRbWQvVzZtaTBqZ1NYREk3a2VCSytsaDFKS3RuUW11dFhMVzh4V1RpM3crdmtNWHg4QUFWajU3VkhyTmVoaEFWVTdrdzcrRlcrQnZGWXRNVEE3bHpQUHJ3VGdjZ0FRN0FJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwMzk0MTAwCWZpbGU6SW1nMlByb21wdF8wLjEuMF94NjQtc2V0dXAuZXhlCmRDZFFuWitFQU16ZS8zeHFZN1k2RjZKUWZFWjE4UzJWTlpudWp1a2NTdEpITjA2a05DZHlicno2ckxKdjQxM0lVUlFTY2lHSXdnR2xnVUkxblVLZkRRPT0K","url":"https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.1.0/Img2Prompt_0.1.0_x64-setup.exe"}}}
+{
+  "version": "0.1.1",
+  "notes": "Release v0.1.1\n\n- Release 0.1.1",
+  "pub_date": "2026-06-02T10:03:13.026Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRbWQvVzZtaTBqZ1EyT05kZnlBclUxdS9TK0NhMTdHd3diUDFmTHg1cmphSy82Vk1EeTIwM2ZpU2xEMGd2VVJ2cG00L3BaV1ZpL25XelRZNWMzWXlaMlZTWi9JWjFSN1FNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwMzk0NTgzCWZpbGU6SW1nMlByb21wdF8wLjEuMV94NjQtc2V0dXAuZXhlCjh6TWdqMHlzUTJTS1Q0a2c5OEYwOWxDN3lUMmc5d0h1QTI3QzU2NFpKSGl5L2wzS2lkL1FzL2R6cUkwb0VkbE9qUzZ3RVRxeU8xV01HMlFHRnFKekRBPT0K",
+      "url": "https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.1.1/Img2Prompt_0.1.1_x64-setup.exe"
+    }
+  }
+}
