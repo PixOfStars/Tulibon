@@ -1,10 +1,9 @@
 {
   "version": "0.1.2",
-  "notes": "Release v0.1.2\n\n- Add instant-save button to mode/style cards\n- Reduce default collections to 2, add right-click context menu\n- Apply accent theme colors broadly\n- Fix empty state duplication\n- Add cancel button to crop panel\n- Rename \"Screenshot\" to \"Select Image\"\n- Fix all plugin dynamic imports for production exe\n",
-  "pub_date": "2026-06-02T11:30:00Z",
+  "notes": "Release v0.1.2\n\n### 新增\n- 收藏夹右键菜单（重命名、更改图标、删除）\n- 收藏夹内联重命名\n- 收藏夹动态图标渲染（8 种图标可选）\n- 强制更新弹窗\n- UI 切换动画\n\n### 修复\n- 剪切板读取空白图\n- 选择图片按钮打开文件选择对话框失败\n- 首页状态在页面切换后丢失\n- 拖拽文件到窗口无效\n- 更新器动态 import 静默失败\n- 更多修复见 CHANGELOG.md\n",
+  "pub_date": "2026-06-02T11:34:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRbWQvVzZtaTBqZ2ZvT0VPbUdVUkN2NVMzK1JXZ1VjTGV1K1ZVVy80QWl1cFAvSWlNd216RlB6N1ZqVHhOQ1Budmt1Zzd2anRTL3hSelZvdHlHU1c3cU0xaWQxMHVQRlFZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwMzk2ODk3CWZpbGU6SW1nMlByb21wdF8wLjEuMl94NjQtc2V0dXAuZXhlCjhiSTBBWW9admo0aHlKOGhZMGtTRlVQWHhZdTZkZ05sS3dBVy9QZzZWaFl0OCt3NTNoQk9DY1o0ZHR3RmtOL0QzWlFXVWFPOE5VYmY2UG9lNzZiNUNBPT0K",
       "url": "https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.1.2/Img2Prompt_0.1.2_x64-setup.exe"
     }
   }
