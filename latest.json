@@ -1,0 +1,11 @@
+{
+  "version": "0.0.3",
+  "notes": "Initial release with updater support.\n\n- 4-icon sidebar navigation\n- Auto theme (follow system)\n- 3 style presets\n- Settings persistence fix\n- Version auto-increment",
+  "pub_date": "2026-06-02T00:00:00Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "PLACEHOLDER",
+      "url": "https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.0.3/Img2Prompt_0.0.3_x64-setup.exe"
+    }
+  }
+}
