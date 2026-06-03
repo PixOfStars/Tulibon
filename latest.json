@@ -1,11 +1,11 @@
 {
-  "version": "0.1.4",
-  "notes": "Release v0.1.4",
-  "pub_date": "2026-06-03T03:19:25.547Z",
+  "version": "0.1.5",
+  "notes": "Release v0.1.5\n\n- Unify design analysis mode, add local OCR, disk image storage, API key encryption\n- Refactor Gemini prompts and model types\n- Remove old Knowledge/Prompt views, add Design/Ocr views",
+  "pub_date": "2026-06-03T04:55:38.555Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRbWQvVzZtaTBqZ1FneGxIbjdMVjNhTXd1akVKa2ZvU2dHSmlHeFZpQytDak1qZlhDYWFUcDF0bUZRdDlabGl4ekpjUTVwbmhzZHVRbi8vbUJGTEtmSzZtTk9udGRNR3dnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNDU2MzE4CWZpbGU6SW1nMlByb21wdF8wLjEuNF94NjQtc2V0dXAuZXhlCnlsZWpwaGlta2xlUWdIOG52dENvbEhhL1JOZ2NtODVHdVVNYllwcFFXeTJVR1B3dC9nVysvMkpIdE5FbDBEQU4xVFIxK2gxSVY4NGVNSlJNSlladkFnPT0K",
-      "url": "https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.1.4/Img2Prompt_0.1.4_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRbWQvVzZtaTBqZ1lFa0k2cVBMRG1RRmN1NFZheVYrMjBNNXU3MTQwZUUrNzk0a0IwbEp5Zjkvb2lDYVo1b3lMWmVRRWE0SFhDY2ViV3hxT2JKcExRVURaalg3M0U2cmdzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNDYyNDYwCWZpbGU6SW1nMlByb21wdF8wLjEuNV94NjQtc2V0dXAuZXhlCjVwVS8wYlNOdFQ2T0V0L0RXZXFEYytnajV6Zk9tY3Q2OEF0ZlVHSFA2eTdocS9Ga053cXYwRUxyLythOVZmZHdDbzdqZW5RblBBYkxYRVlHU3YyS0RnPT0K",
+      "url": "https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.1.5/Img2Prompt_0.1.5_x64-setup.exe"
     }
   }
 }
