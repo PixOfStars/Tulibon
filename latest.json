@@ -1,11 +1,11 @@
 {
-  "version": "0.2.1",
-  "notes": "Release v0.2.1\n\n- Release 0.2.1",
-  "pub_date": "2026-06-03T06:51:49.212Z",
+  "version": "0.2.2",
+  "notes": "Release v0.2.2\n\n- Fix 15 bugs: window width, clipboard validation, WebP→PNG, tag dedup, theme cache, backoff, date format, OCR timeout, tray icon panic\n- Extract prompts.ts, validate.ts with runtime analysis result checking\n- Split Home.tsx: CollectionContextMenu, 3 hooks (shortcuts/input/crop)\n- Simplify export UI to single button, copy copies full report\n- Auto-dismiss undo banner after 5 seconds\n- Move OCR to dedicated sidebar page with Scan icon\n- Rename app from Img2Prompt to AI Vision",
+  "pub_date": "2026-06-03T07:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNWl6MlhsaXo0OU5uREdkbHhWZS9GblNTd2lucE40V0hFaW1YQStqVTJJOHM5YmlYVFlJUEZXT3ZPOE1VWjFhZ08yaGZtRER1eDJuN0xBaDJVZjJzUWpWK0NOZHoxOEFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNDY5NDkwCWZpbGU6QUkgVmlzaW9uXzAuMi4xX3g2NC1zZXR1cC5leGUKRnFjRktkWU80UDVhaEdPOEVwbWlPSWVBelAxSzhsL2M0ZU8zQTZDamhHRVliNnoyZnJ4RmFyNW01Q0NmWExGdyt5T1NyaHU3QTBWQ0JwQUJSYUFwQ3c9PQo=",
-      "url": "https://github.com/PixOfStars/AI-Vision/releases/download/v0.2.1/AI.Vision_0.2.1_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNWl6MlhsaXo0OUsybjhnd2d0YWgyWUZ1aFNTWDRKRTZPclBmNnJpZXpnTitsa0NuZFRUYS8zZG5CamlpL0dNaVk3R1c1RDA0Um5KZjdKektUNnZiL3lrMFZOdTJqYUE0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNDY5ODcwCWZpbGU6QUktVmlzaW9uXzAuMi4yX3g2NC1zZXR1cC5leGUKUTU1RGVQakRVZlRtUDJNbzBOWk5pREFyTGZDazFnZFBxU0JXMlE5RWgzZDFmaEx2QU1DMWc2Vms5VUVVOUt5cDI3cnc2R3N2QnJMOGtOdGU3eE1SQlE9PQo=",
+      "url": "https://github.com/PixOfStars/AI-Vision/releases/download/v0.2.2/AI-Vision_0.2.2_x64-setup.exe"
     }
   }
 }
