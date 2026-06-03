@@ -1,0 +1,11 @@
+{
+  "version": "0.1.4",
+  "notes": "Release v0.1.4",
+  "pub_date": "2026-06-03T03:19:25.547Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRbWQvVzZtaTBqZ1FneGxIbjdMVjNhTXd1akVKa2ZvU2dHSmlHeFZpQytDak1qZlhDYWFUcDF0bUZRdDlabGl4ekpjUTVwbmhzZHVRbi8vbUJGTEtmSzZtTk9udGRNR3dnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNDU2MzE4CWZpbGU6SW1nMlByb21wdF8wLjEuNF94NjQtc2V0dXAuZXhlCnlsZWpwaGlta2xlUWdIOG52dENvbEhhL1JOZ2NtODVHdVVNYllwcFFXeTJVR1B3dC9nVysvMkpIdE5FbDBEQU4xVFIxK2gxSVY4NGVNSlJNSlladkFnPT0K",
+      "url": "https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.1.4/Img2Prompt_0.1.4_x64-setup.exe"
+    }
+  }
+}
