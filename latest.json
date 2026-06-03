@@ -1,11 +1,11 @@
 {
-  "version": "0.1.6",
-  "notes": "Release v0.1.6\n\n- Release 0.1.6",
-  "pub_date": "2026-06-03T05:03:17.389Z",
+  "version": "0.1.7",
+  "notes": "Release v0.1.7 — security hardening, run mode removal, UI polish",
+  "pub_date": "2026-06-03T05:49:02.806Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRbWQvVzZtaTBqZ1h4bzFBdmhKUERvOU1obEorZkZkSTBTOVRUdS9wSnFGS3ZLK0VBd1lZYXpKT0xqMFU5aTl6Ri9DVE92djZrbjExVHkrV25oVU85dVdJNU82OHdQTGd3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNDYyOTg5CWZpbGU6SW1nMlByb21wdF8wLjEuNl94NjQtc2V0dXAuZXhlCkQ3aHFsNTFRS3l4UzdKa2RJaStUZzFNcnkrZGxaVC9Hd01US3NKclBUWjBhZTlGbEgrN0lGZld4NkJhVkZXc2orRmMvTkZiWmFxS2NYUGpoN0VWbUFBPT0K",
-      "url": "https://github.com/PixOfStars/img2prompt-releases/releases/download/v0.1.6/Img2Prompt_0.1.6_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNWl6MlhsaXo0OU80MVpENEZmY3E4SzYzWXFERzVQUE9JdVEwVzJJakRGN1kxd3pWeWhSMjd0TzJlb0RjcWZRMVBvVDdxMEdPOG5YUFkzZitKQ093azRob1ZMbTFNTFFFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNDY1NTUwCWZpbGU6SW1nMlByb21wdF8wLjEuN194NjQtc2V0dXAuZXhlCm1UNVlkR3ZzMmk0b1AwZ2dUb04vTHg2TmI1ZVFYVDhQTjFRN2dsb3pSWlB4bE9pUVl6MjdKYktTVTZVSGZtNG84TmJYbHd2UlBkTU40amwxL2s5NkNnPT0K",
+      "url": "https://github.com/PixOfStars/AI-Vision/releases/download/v0.1.7/Img2Prompt_0.1.7_x64-setup.exe"
     }
   }
 }
