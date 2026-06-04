@@ -1,11 +1,11 @@
 {
-  "version": "0.3.3",
-  "notes": "Release v0.3.3\n\n- fix: release script use master branch for releases repo",
-  "pub_date": "2026-06-04T12:01:52.106Z",
+  "version": "0.30.4",
+  "notes": "Release v0.30.4\n\n- feat: sidebar drag reorder, plugin icons, UI cleanup, version 0.30.3\n- Update changelog for v0.3.3\n- Update README for v0.3.3\n- Release v0.3.3\n- fix: release script use master branch for releases repo\n- Bump version to 0.3.3",
+  "pub_date": "2026-06-04T13:14:11.274Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNWl6MlhsaXo0OUs3cFl3QnFXa0p4bzRFWFVIUDB3WllOQSs1TGZKdlNsZGpobS9wcXZ0L1pYN0tBZHpGWElkSUNNWWRaUDRoN2c2SXRpVWZwSkNUSkhaSUlMM1VEYXdVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNTc0MjIwCWZpbGU6QUktVmlzaW9uXzAuMy4zX3g2NC1zZXR1cC5leGUKb0lJcWhRUlNHcUdUWG8yS3lGZ3NTSUdDYUNKd3NlUUNqUzZlRHNmTmw4VkpleHg2dWZabUhNY0JteDRJWmIydW4xcXZXZjhoSXh5cmo1Vmt1VFZvQkE9PQo=",
-      "url": "https://github.com/PixOfStars/AI-Vision/releases/download/v0.3.3/AI-Vision_0.3.3_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNWl6MlhsaXo0OUdsbjdlZEdxUG9JcnBxeVFscGJwcXlRcTcvTEU0Uk5sUG0rT1RjWUg0cXhaWDVERkF5UTU1VENBZ0NzaDExektxS2NQYTF1anJSMEdhTUlQbUExTlFFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNTc4ODMxCWZpbGU6QUktVmlzaW9uXzAuMzAuNF94NjQtc2V0dXAuZXhlCjcvVjRValJwYWs0bkh2dVkyVVhFK1dWS0lFdys2Zmt3R0cyZFB3bEZKNFpqWENqQktLbUF5NFM5VnNzTzRjU0x4WDJTS01BWnc0QzREbzg4SHI1WEN3PT0K",
+      "url": "https://github.com/PixOfStars/AI-Vision/releases/download/v0.30.4/AI-Vision_0.30.4_x64-setup.exe"
     }
   }
 }
