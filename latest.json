@@ -1,11 +1,11 @@
 {
-  "version": "0.2.6",
-  "notes": "Release v0.2.6\n\n- Release 0.2.6",
-  "pub_date": "2026-06-04T02:18:36.073Z",
+  "version": "0.2.7",
+  "notes": "Release v0.2.7\n\n- Release 0.2.7",
+  "pub_date": "2026-06-04T02:37:56.770Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNWl6MlhsaXo0OU40UThjRjN5OUpIcGJhL3NoRVlqV3VPY1pGTU9URzJERDBFNFJnVC9DR2F6L09FRTlYMDlvVndSQ0JRbWw2V2JKV0dydzBUcEhiclZIUnNVM294M0E4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNTM5NDc1CWZpbGU6QUktVmlzaW9uXzAuMi42X3g2NC1zZXR1cC5leGUKY3QxUGoyb1Y2UTZQdy9sRXkrRkUzWERiSE9OMk1mWFMxWUNMcUwzZTVnQmtmQ3dsSVA3NUU1Q2VaSGM1MmJtOUlFYjluSksvS3hKWWZETXFxZ1ZQQXc9PQo=",
-      "url": "https://github.com/PixOfStars/AI-Vision/releases/download/v0.2.6/AI-Vision_0.2.6_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNWl6MlhsaXo0OU91czRzNDJwM1JwOWFnV2J0VkRuN0JpanBNbXo2ZUVuSzlWUWYyZ0VrUGh5dlFZRmt6QnB0ODJEOUFLbmo2Zm9QeGZtOEhQRDJ6bWJUUEpLTmVzaXdjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNTQwNjYyCWZpbGU6QUktVmlzaW9uXzAuMi43X3g2NC1zZXR1cC5leGUKWHV4Q29DaFZNNllJUDc4TnllMEozSEE5dnZJOElHZUYyT3VwbjRtNTFnK0RyaUtOVGlXM2pmYVJYVXM2Nm1RNEN4UHovTW1BVWNXaFE5NWRYbjZNQ1E9PQo=",
+      "url": "https://github.com/PixOfStars/AI-Vision/releases/download/v0.2.7/AI-Vision_0.2.7_x64-setup.exe"
     }
   }
 }
