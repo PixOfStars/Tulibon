@@ -1,0 +1,13 @@
+{
+  "id": "ocr",
+  "name": { "zh": "文字识别", "en": "OCR" },
+  "version": "0.1.0",
+  "description": {
+    "zh": "图片文字识别 (Windows OCR)",
+    "en": "Image text recognition (Windows OCR)"
+  },
+  "entry": "index.js",
+  "icon": "Scan",
+  "order": 30,
+  "routes": { "settings": "settings.js" }
+}

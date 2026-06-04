@@ -1,0 +1,35 @@
+node_modules/
+dist/
+*.key
+*.key.pub
+.env
+.env.local
+src-tauri/target/
+.claude/*.json
+public/tesseract/*.traineddata.gz
+plugins/*.zip
+
+SPEC.md
+CLAUDE.md
+.githooks/
+tsconfig.app.tsbuildinfo
+
+# ── Build / release scripts (local only) ──
+scripts/
+
+# ── Auto-generated (rebuild on tauri build) ──
+src-tauri/gen/
+
+# ── Build artifacts ──
+tsconfig.node.tsbuildinfo
+
+# ── Platform-specific icons (Windows-only app) ──
+src-tauri/icons/android/
+src-tauri/icons/ios/
+src-tauri/icons/icon.icns
+src-tauri/icons/Square*.png
+src-tauri/icons/StoreLogo.png
+
+# ── Removed / deprecated ──
+src-tauri/src/protocol.rs
+public/icons/

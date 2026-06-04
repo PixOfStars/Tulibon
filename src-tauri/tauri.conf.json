@@ -1,0 +1,72 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicedoc/tauri/refs/heads/dev/.schemas/config.schema.json",
+  "productName": "Tulibon",
+  "version": "0.30.5",
+  "identifier": "com.Tulibon.app",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npx tsc -b && npx vite build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Tulibon",
+        "width": 920,
+        "height": 760,
+        "minWidth": 920,
+        "minHeight": 560,
+        "resizable": true,
+        "decorations": false,
+        "center": true,
+        "shadow": true,
+        "transparent": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": true,
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": {
+      "WebView2Loader.dll": "WebView2Loader.dll",
+      "../plugins": "plugins",
+      "../plugins.json": "plugins.json"
+    },
+    "targets": ["nsis"],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["English", "SimpChinese"]
+      }
+    }
+  },
+  "plugins": {
+    "clipboard-manager": null,
+    "global-shortcut": null,
+    "dialog": null,
+    "fs": null,
+    "shell": {
+      "open": true
+    },
+    "updater": {
+      "endpoints": [
+        "https://raw.githubusercontent.com/PixOfStars/Tulibon/main/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY0RjgyQzk2OTczRDhCRjkKUldUNWl6MlhsaXo0OUNYU2swTSsrT09yV0h6aWpoaXk4S3NDa3luTnd6ZjdVemo4SmgzYnF4dkQK",
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}
