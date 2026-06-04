@@ -12,13 +12,13 @@ interface AboutTabProps extends TabProps {
   onInstallUpdate: () => void;
 }
 
-const VERSION = '0.3.3';
+const VERSION = '0.30.3';
 
 const AboutTab = ({ colors, t, updateState, updateInfo, onCheckUpdate, onInstallUpdate }: AboutTabProps) => {
   const [qrModalOpen, setQrModalOpen] = useState(false);
 
   const handleFeedback = async () => {
-    await tauriInvoke('plugin:shell|open', { path: 'https://github.com/PixOfStars/img2prompt/issues/new' });
+    await tauriInvoke('plugin:shell|open', { path: 'https://github.com/PixOfStars/AI-Vision/issues/new' });
   };
 
   return (

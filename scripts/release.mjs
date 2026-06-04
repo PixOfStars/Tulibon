@@ -20,8 +20,8 @@ function bumpVersion(v) {
   const parts = v.split('.').map(Number);
   parts[2] += 1;
   if (parts[2] >= 10) { parts[2] = 0; parts[1] += 1; }
-  if (parts[1] >= 10) { parts[1] = 0; parts[0] += 1; }
-  return parts.join('.');
+  if (parts[1] >= 100) { parts[1] = 0; parts[0] += 1; }
+  return `${parts[0]}.${String(parts[1]).padStart(2,'0')}.${parts[2]}`;
 }
 
 function exec(cmd, opts = {}) {

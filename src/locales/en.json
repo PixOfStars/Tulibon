@@ -3,7 +3,6 @@
   "settings": "Settings",
   "loading": "Analyzing…",
   "loadingApp": "Loading…",
-
   "modeLabel": "Theme",
   "modeLight": "Light",
   "modeDark": "Dark",
@@ -12,13 +11,11 @@
   "langZh": "中文",
   "langEn": "English",
   "langSwitched": "Switched to {lang}",
-
   "inputTab": "Input",
   "inputClipboard": "Clipboard",
   "inputDragDrop": "Drag & Drop",
   "inputUrlPaste": "URL Input",
   "inputFilePicker": "File Picker",
-
   "clipboardMode": "Clipboard Mode",
   "clipboardAuto": "Auto Detect",
   "clipboardManual": "Manual",
@@ -31,19 +28,15 @@
   "hintClipboardAction": "Paste clipboard",
   "hintFilePickerAction": "Select image file",
   "hintUrlPasteAction": "Paste image URL",
-
   "downloadImage": "Downloading image…",
   "imageDownloaded": "Image downloaded",
   "imageDownloadFailed": "Image download failed",
   "imageLoaded": "Image loaded",
   "fileReadFailed": "File read failed",
   "imagesAddedToBatch": "{n} images added to batch",
-
   "urlPlaceholder": "Paste image URL, Enter to load…",
-
   "generalTab": "General",
   "autoStart": "Start with Windows",
-
   "aiProviderTab": "AI Provider",
   "apiKey": "API Key",
   "apiKeyPlaceholder": "Paste your API Key",
@@ -57,7 +50,6 @@
   "clearKeyConfirm": "Click again to confirm",
   "keyRemoved": "Key removed",
   "needApiKey": "Please configure an API Key",
-
   "modeStyleTab": "Modes & Styles",
   "modeProfilesTitle": "Analysis Modes",
   "modeNameZh": "Chinese Name",
@@ -72,7 +64,6 @@
   "deleteMode": "Delete Mode",
   "deleteModeConfirm": "Delete this mode?",
   "untitledMode": "Untitled Mode",
-
   "stylePresetsTitle": "Style Presets",
   "styleNameZh": "Chinese Name",
   "styleNameEn": "English Name",
@@ -83,7 +74,6 @@
   "deleteStyleConfirm": "Delete this style?",
   "untitledStyle": "Untitled Style",
   "builtIn": "Built-in",
-
   "appearanceTab": "Appearance",
   "accentColor": "Accent Color",
   "accentColorCustom": "Custom",
@@ -94,7 +84,6 @@
   "fontSizeSmall": "Small",
   "fontSizeMedium": "Medium",
   "fontSizeLarge": "Large",
-
   "shortcutsTab": "Shortcuts",
   "shortcutClipboardRead": "Read from Clipboard",
   "shortcutToggleWindow": "Show/Hide Window",
@@ -103,13 +92,11 @@
   "shortcutAnalyze": "Analyze",
   "shortcutPlaceholder": "Click then press key combo",
   "shortcutClear": "Clear",
-
   "storageLocation": "Storage Location",
   "storageLocationHint": "Config, history and images will be stored here",
   "selectFolder": "Select Folder",
   "storageChanged": "Data will be moved to new location. Restart required.",
   "restartRequired": "Restart required to take effect",
-
   "aboutTab": "About",
   "aboutVersion": "Version",
   "checkUpdate": "Check for Updates",
@@ -123,22 +110,17 @@
   "updateNow": "Install Update",
   "installUpdate": "Download & Install",
   "installing": "Installing…",
-
   "aboutDisclaimerFree": "This app is completely free.",
   "aboutDisclaimerRefund": "If you obtained it through a paid channel, please request a refund.",
   "aboutOAName": "Official Account: 露蛛",
   "aboutScanToFollow": "Scan to follow",
-
   "feedback": "Feedback",
-
   "sidebarCollapse": "Collapse Sidebar",
   "sidebarExpand": "Expand Sidebar",
-
   "home": "Home",
   "history": "History",
   "search": "Search",
   "collections": "Collections",
-
   "batchTitle": "Batch Processing",
   "batchStart": "Analyze All",
   "batchQueued": "Queued",
@@ -147,12 +129,10 @@
   "batchError": "Error",
   "batchErrorMsg": "Analysis failed",
   "batchClear": "Clear List",
-
   "cropTitle": "Crop Region",
   "cropHint": "Drag to select area, or skip to analyze full image",
   "cropReset": "Reset",
   "cropConfirm": "Confirm",
-
   "analyzedImage": "Analyzed Image",
   "summary": "Summary",
   "tags": "Tags",
@@ -160,15 +140,12 @@
   "addTagPlaceholder": "Enter tag name…",
   "noTags": "No tags",
   "noRecords": "No records",
-
   "sourceClipboard": "Clipboard",
   "sourceDrag": "Drag & Drop",
   "sourceUrl": "URL",
-
   "copy": "Copy",
   "copied": "Copied",
   "copiedToClipboard": "Copied to clipboard",
-
   "dismiss": "Dismiss",
   "error": "Error",
   "save": "Save",
@@ -179,36 +156,30 @@
   "changeIcon": "Change Icon",
   "changeColor": "Change Color",
   "copySuffix": " (copy)",
-
   "applyChanges": "Apply Changes",
   "applied": "Applied",
   "settingsSaved": "Settings saved",
-
   "collection": "Collection",
   "collectionsWithCount": "Collections ({n})",
   "newCollection": "New",
   "newCollectionDefault": "New Collection",
   "noCollection": "No collections",
   "saveToCollection": "Save to Collection",
-
   "favorites": "Favorites",
   "favoriteAdded": "Added to {name}",
   "favoriteRemoved": "Removed from {name}",
   "savedToCollection": "Saved to {name}",
   "removedFromCollection": "Removed from {name}",
-
   "historyClear": "Clear",
   "searchPlaceholder": "Search images, tags…",
   "searchResults": "Search results ({n})",
   "recordCount": "{n} records",
   "noHistory": "No analysis records yet",
   "noHistorySearch": "No matching records",
-
   "undo": "Undo",
   "undoAction": "Undo",
   "undoFavorite": "Removed from favorites",
   "undoDelete": "Record deleted",
-
   "exportTxt": "Export TXT",
   "exportSuccess": "Export success",
   "exportFailed": "Export failed",
@@ -217,7 +188,6 @@
   "exportSectionSummary": "Summary",
   "exportSectionTags": "Tags",
   "exportSectionAnalysis": "Analysis",
-
   "fieldImageContent": "Image Content",
   "fieldDesignPurpose": "Design Purpose",
   "fieldDesignStyle": "Design Style",
@@ -225,7 +195,6 @@
   "fieldColorTypography": "Color & Typography",
   "fieldTakeaways": "Takeaways",
   "fieldPrompt": "AI Prompt",
-
   "ocrEngineTab": "OCR Engine",
   "ocrEngineTitle": "OCR Engine",
   "ocrEngineDesc": "Choose the recognition engine that suits your needs. Changes apply instantly on next recognition.",
@@ -251,7 +220,6 @@
   "ocrEngineFallback": "Windows OCR not supported on this system. Switched to Tesseract.",
   "ocrEngineLangMissing": "{lang} language pack not installed. The engine may not recognize text in this language.",
   "ocrEngineDownloadRequired": "Please download the {engine} model in Settings first",
-
   "ocrMode": "Text Recognition",
   "ocrRecognize": "Recognize",
   "ocrRecognizing": "Recognizing…",
@@ -260,7 +228,6 @@
   "ocrCopyText": "Copy Text",
   "ocrLanguage": "Recognition Language",
   "ocrHint": "Upload an image and click \"Recognize\" to extract text",
-
   "pluginManagerTab": "Plugins",
   "pluginManagerTitle": "Plugin Manager",
   "pluginManagerDesc": "Download and install plugins to extend functionality. Plugins update independently from the main app.",
@@ -283,9 +250,9 @@
   "pluginLoading": "Loading plugin…",
   "pluginLoadFailed": "Plugin load failed",
   "pluginNoPlugins": "No plugins installed",
-  "pluginRegistry": "Plugin Registry",
+  "pluginRegistry": "Plugin Manager",
   "pluginRegistryHint": "Browse more available plugins",
-  "pluginRegistrySection": "Plugin Registry",
+  "pluginRegistrySection": "Plugin Manager",
   "pluginRegistryAllInstalled": "All available plugins are installed",
   "pluginInstallFromUrl": "Install from URL",
   "settingsGeneralGroup": "General",
@@ -293,5 +260,7 @@
   "pluginInstalledEnabled": "Enabled",
   "pluginInstalledDisabled": "Disabled",
   "pluginUninstallFull": "Remove Completely",
-  "pluginConfirmUninstall": "Confirm Removal?"
+  "pluginConfirmUninstall": "Confirm Removal?",
+  "pluginRegistryEmpty": "Cannot load plugin manager. Check your network connection.",
+  "pluginRegistryNoPlugins": "No plugins available"
 }

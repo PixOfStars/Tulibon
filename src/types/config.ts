@@ -117,6 +117,7 @@ export interface AppConfig {
 	exportFormat: "md" | "txt";
 	quickSave: boolean;
 	sidebarWidth: number;
+  sidebarOrder: string[];
 	ocrEngine: OCREngine;
 	ocrEngineDownloaded: Record<OCREngine, boolean>;
 	ocrCustomDownloadUrl: string;

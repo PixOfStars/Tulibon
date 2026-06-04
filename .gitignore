@@ -8,3 +8,8 @@ src-tauri/target/
 .claude/*.json
 public/tesseract/*.traineddata.gz
 plugins/*.zip
+
+SPEC.md
+CLAUDE.md
+.githooks/
+tsconfig.app.tsbuildinfo

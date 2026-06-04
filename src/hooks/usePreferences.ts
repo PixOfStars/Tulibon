@@ -40,6 +40,7 @@ const DEFAULT_CONFIG: AppConfig = {
 	exportFormat: "md",
 	quickSave: true,
 	sidebarWidth: 180,
+	sidebarOrder: [],
 	ocrEngine: DEFAULT_OCR_ENGINE,
 	ocrEngineDownloaded: { ...DEFAULT_OCR_DOWNLOAD_STATE },
 	ocrCustomDownloadUrl: "",

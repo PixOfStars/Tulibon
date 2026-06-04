@@ -1,11 +1,12 @@
-import { useRef, useCallback, useEffect } from 'react';
-import { Gear, House, Clock, MagnifyingGlass, Folders, Scan, PuzzlePiece } from '@phosphor-icons/react';
+import { useRef, useCallback, useEffect, useState } from 'react';
+import { Gear, House, Clock, MagnifyingGlass, Folders, Scan, PuzzlePiece, DotsSixVertical } from '@phosphor-icons/react';
 import type { AppTheme } from '../theme';
 import { SIDEBAR_ITEM_SIZE, SIDEBAR_ICON_SIZE } from '../styles';
 import zh from '../locales/zh.json';
 import en from '../locales/en.json';
 
 const MIN_SIDEBAR_WIDTH = 140;
+const HOLD_DURATION = 500;
 const MAX_SIDEBAR_WIDTH = 420;
 
 export interface PluginNavItem {
@@ -22,9 +23,11 @@ interface SidebarProps {
   collapsed: boolean;
   activeView: SidebarView | string;
   plugins: PluginNavItem[];
+  sidebarOrder: string[];
   onNavigate: (view: string) => void;
   onOpenSettings: () => void;
   onResize: (width: number) => void;
+  onReorder: (newOrder: string[]) => void;
   theme: AppTheme;
   lang: 'zh' | 'en';
 }
@@ -46,14 +49,24 @@ const ICON_NAME_MAP: Record<string, React.ComponentType<{ size?: number; weight?
 };
 
 const Sidebar = ({
-  width, collapsed, activeView, plugins,
-  onNavigate, onOpenSettings, onResize,
+  width, collapsed, activeView, plugins, sidebarOrder,
+  onNavigate, onOpenSettings, onResize, onReorder,
   theme, lang,
 }: SidebarProps) => {
   const t = lang === 'zh' ? zh : en;
   const colors = theme.colors;
 
   const isDragging = useRef(false);
+  var sortedPlugins = plugins.slice().sort(function(a,b) {
+    var ia=sidebarOrder.indexOf(a.id), ib=sidebarOrder.indexOf(b.id);
+    if(ia!==-1&&ib!==-1)return ia-ib;
+    if(ia!==-1)return -1; if(ib!==-1)return 1;
+    return (a.order||0)-(b.order||0);
+  });
+  var _s=useState<number|null>(null),dragIndex=_s[0],setDragIndex=_s[1];
+  var _s2=useState<number|null>(null),dragOverIndex=_s2[0],setDragOverIndex=_s2[1];
+  var _s3=useState<number|null>(null),holdIndex=_s3[0],setHoldIndex=_s3[1];
+  var holdTimer=useRef<ReturnType<typeof setTimeout>|null>(null),dragNodeRef=useRef<HTMLDivElement|null>(null);
 
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -83,17 +96,28 @@ const Sidebar = ({
     };
   }, [onResize]);
 
-  const navBtnStyle = (active: boolean): React.CSSProperties => ({
+  var pluginMouseDown=function(e:React.MouseEvent,idx:number){if(e.button!==0)return;holdTimer.current=setTimeout(function(){holdTimer.current=null;setHoldIndex(idx);},HOLD_DURATION);};
+  var pluginMouseUp=function(_e:React.MouseEvent,_idx:number,pluginId:string){if(holdTimer.current){clearTimeout(holdTimer.current);holdTimer.current=null;onNavigate("plugin:"+pluginId);}};
+  var pluginMouseLeave=function(){if(holdTimer.current){clearTimeout(holdTimer.current);holdTimer.current=null;}};
+  var dragStart=function(e:React.DragEvent,idx:number){setDragIndex(idx);setHoldIndex(null);e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",String(idx));if(e.currentTarget instanceof HTMLElement){e.currentTarget.style.opacity="0.4";dragNodeRef.current=e.currentTarget as HTMLDivElement;}};
+  var dragOver=function(e:React.DragEvent,idx:number){e.preventDefault();e.dataTransfer.dropEffect="move";setDragOverIndex(idx);};
+  var dragLeave=function(){setDragOverIndex(null);};
+  var drop=function(e:React.DragEvent,toIdx:number){e.preventDefault();setDragOverIndex(null);if(dragIndex===null||dragIndex===toIdx)return;var arr=sortedPlugins.slice();var m=arr.splice(dragIndex,1)[0];arr.splice(toIdx,0,m);onReorder(arr.map(function(p){return p.id;}));};
+  var dragEnd=function(){if(dragNodeRef.current){dragNodeRef.current.style.opacity="1";dragNodeRef.current=null;}setDragIndex(null);setDragOverIndex(null);setHoldIndex(null);};
+
+    var navBtnStyle=function(active:boolean,isHold:boolean):React.CSSProperties{return {
     display: 'flex', alignItems: 'center', height: SIDEBAR_ITEM_SIZE, gap: 10,
     padding: collapsed ? '0' : '0 12px',
     justifyContent: collapsed ? 'center' : 'flex-start',
     width: '100%', border: 'none', borderRadius: 10,
-    backgroundColor: active ? colors.accentBg : 'transparent',
+    backgroundColor: isHold ? colors.accentBg : (active ? colors.accentBg : 'transparent'),
     color: active ? colors.accent : colors.text,
-    cursor: 'pointer', fontSize: 13, fontWeight: active ? 700 : 500,
-    transition: 'all 0.15s', position: 'relative',
-    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-  });
+    cursor: isHold ? 'grabbing' : 'pointer', fontSize: 13, fontWeight: active ? 700 : 500,
+    transition: isHold ? 'none' : 'all 0.15s', position: 'relative',
+    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transform: isHold ? 'scale(1.05)' : 'scale(1)', boxShadow: isHold ? '0 4px 12px ' + colors.accent + '40' : 'none', zIndex: isHold ? 1 : 'auto', userSelect: 'none', WebkitUserSelect: 'none',
+  }; };
+
+  var dropLineStyle = { height: 2, borderRadius: 1, backgroundColor: colors.accent, margin: '0 8px', flexShrink: 0 };
 
   const activeIndicator: React.CSSProperties = {
     position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
@@ -120,7 +144,7 @@ const Sidebar = ({
               key={id}
               onClick={() => onNavigate(id)}
               title={collapsed ? label : undefined}
-              style={navBtnStyle(active)}>
+              style={navBtnStyle(active, false)}>
               {active && !collapsed && <div style={activeIndicator} />}
               <Icon size={SIDEBAR_ICON_SIZE} weight={active ? 'fill' : 'bold'} />
               {!collapsed && (
@@ -131,7 +155,7 @@ const Sidebar = ({
         })}
 
         {/* Plugin separator — only show if there are plugins */}
-        {plugins.length > 0 && (
+        {sortedPlugins.length > 0 && (
           <div style={{
             height: 1, backgroundColor: colors.border,
             margin: '6px 8px', flexShrink: 0,
@@ -139,24 +163,30 @@ const Sidebar = ({
         )}
 
         {/* Dynamic plugin items */}
-        {plugins.map((plugin) => {
+        {sortedPlugins.map(function(plugin, idx) {
           const active = activeView === `plugin:${plugin.id}`;
-          const label = lang === 'zh' ? plugin.name.zh : plugin.name.en;
+          var h=holdIndex===idx,d=dragIndex===idx,line=dragOverIndex===idx&&dragIndex!==idx&&dragIndex!==null,I=ICON_NAME_MAP[plugin.icon]||PuzzlePiece; var label = lang === 'zh' ? plugin.name.zh : plugin.name.en;
           return (
-            <button
-              key={plugin.id}
-              onClick={() => onNavigate(`plugin:${plugin.id}`)}
-              title={collapsed ? label : undefined}
-              style={navBtnStyle(active)}>
-              {active && !collapsed && <div style={activeIndicator} />}
-              {(() => {
-                const IconComponent = ICON_NAME_MAP[plugin.icon] || PuzzlePiece;
-                return <IconComponent size={SIDEBAR_ICON_SIZE} weight={active ? 'fill' : 'bold'} />;
-              })()}
-              {!collapsed && (
-                <span>{label}</span>
-              )}
-            </button>
+            <div key={plugin.id}>
+              {line && <div style={dropLineStyle} />}
+              <div
+                draggable={h}
+                onMouseDown={function(e){pluginMouseDown(e,idx)}}
+                onMouseUp={function(e){pluginMouseUp(e,idx,plugin.id)}}
+                onMouseLeave={pluginMouseLeave}
+                onDragStart={function(e){dragStart(e,idx)}}
+                onDragOver={function(e){dragOver(e,idx)}}
+                onDragLeave={dragLeave}
+                onDrop={function(e){drop(e,idx)}}
+                onDragEnd={dragEnd}
+                style={Object.assign({},navBtnStyle(active,h||d),{display:"flex",alignItems:"center",opacity:d?0.4:1})}
+                title={collapsed?label:undefined}>
+                {active&&!collapsed&&<div style={activeIndicator}/>}
+                {!collapsed&&<div style={{flexShrink:0,display:"flex",alignItems:"center",opacity:h?1:0.3,marginRight:-4,cursor:h?"grabbing":"grab"}}><DotsSixVertical size={12} weight="bold"/></div>}
+                <I size={SIDEBAR_ICON_SIZE} weight={active?"fill":"bold"}/>
+                {!collapsed&&<span style={{flex:1}}>{label}</span>}
+              </div>
+            </div>
           );
         })}
       </div>
@@ -166,7 +196,7 @@ const Sidebar = ({
         <button
           onClick={onOpenSettings}
           title={collapsed ? t.settings : undefined}
-          style={navBtnStyle(false)}>
+          style={navBtnStyle(false, false)}>
           <Gear size={SIDEBAR_ICON_SIZE} weight="bold" />
           {!collapsed && <span>{t.settings}</span>}
         </button>

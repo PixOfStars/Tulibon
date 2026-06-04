@@ -3,7 +3,6 @@
   "settings": "设置",
   "loading": "正在分析…",
   "loadingApp": "加载中…",
-
   "modeLabel": "主题模式",
   "modeLight": "浅色",
   "modeDark": "深色",
@@ -12,13 +11,11 @@
   "langZh": "中文",
   "langEn": "English",
   "langSwitched": "已切换为{lang}",
-
   "inputTab": "输入方式",
   "inputClipboard": "剪贴板读取",
   "inputDragDrop": "拖拽上传",
   "inputUrlPaste": "URL 输入",
   "inputFilePicker": "选择文件",
-
   "clipboardMode": "剪贴板模式",
   "clipboardAuto": "自动检测",
   "clipboardManual": "手动读取",
@@ -31,19 +28,15 @@
   "hintClipboardAction": "粘贴剪贴板",
   "hintFilePickerAction": "选择图片文件",
   "hintUrlPasteAction": "粘贴图片URL",
-
   "downloadImage": "正在下载图片…",
   "imageDownloaded": "图片已下载",
   "imageDownloadFailed": "图片下载失败",
   "imageLoaded": "图片已加载",
   "fileReadFailed": "文件读取失败",
   "imagesAddedToBatch": "{n} 张图片已加入批处理",
-
   "urlPlaceholder": "粘贴图片链接，回车加载…",
-
   "generalTab": "通用",
   "autoStart": "开机自启",
-
   "aiProviderTab": "AI 服务商",
   "apiKey": "API Key",
   "apiKeyPlaceholder": "粘贴你的 API Key",
@@ -57,7 +50,6 @@
   "clearKeyConfirm": "再次点击确认清除",
   "keyRemoved": "已移除密钥",
   "needApiKey": "请先配置 API Key",
-
   "modeStyleTab": "分析模式",
   "modeProfilesTitle": "分析模式",
   "modeNameZh": "中文名称",
@@ -72,7 +64,6 @@
   "deleteMode": "删除模式",
   "deleteModeConfirm": "确认删除此模式？",
   "untitledMode": "未命名模式",
-
   "stylePresetsTitle": "风格指令",
   "styleNameZh": "中文名称",
   "styleNameEn": "英文名称",
@@ -83,7 +74,6 @@
   "deleteStyleConfirm": "确认删除此风格？",
   "untitledStyle": "未命名风格",
   "builtIn": "内置",
-
   "appearanceTab": "外观",
   "accentColor": "主题色",
   "accentColorCustom": "自定义",
@@ -94,7 +84,6 @@
   "fontSizeSmall": "小",
   "fontSizeMedium": "中",
   "fontSizeLarge": "大",
-
   "shortcutsTab": "快捷键",
   "shortcutClipboardRead": "从剪贴板读取",
   "shortcutToggleWindow": "显示/隐藏窗口",
@@ -103,13 +92,11 @@
   "shortcutAnalyze": "开始分析",
   "shortcutPlaceholder": "点击后按下组合键",
   "shortcutClear": "清除",
-
   "storageLocation": "数据存储位置",
   "storageLocationHint": "所有配置、历史和图片将存储在此文件夹",
   "selectFolder": "选择文件夹",
   "storageChanged": "数据将迁移到新位置，需重启生效",
   "restartRequired": "需重启应用生效",
-
   "aboutTab": "关于",
   "aboutVersion": "版本",
   "checkUpdate": "检查更新",
@@ -123,22 +110,17 @@
   "updateNow": "立即更新",
   "installUpdate": "下载并安装",
   "installing": "正在安装…",
-
   "aboutDisclaimerFree": "本软件完全免费。",
   "aboutDisclaimerRefund": "如果你是通过付费渠道获得的，请及时申请退款。",
   "aboutOAName": "公众号：露蛛",
   "aboutScanToFollow": "扫码关注",
-
   "feedback": "意见反馈",
-
   "sidebarCollapse": "折叠侧边栏",
   "sidebarExpand": "展开侧边栏",
-
   "home": "首页",
   "history": "历史记录",
   "search": "搜索",
   "collections": "收藏夹",
-
   "batchTitle": "批量处理",
   "batchStart": "全部分析",
   "batchQueued": "等待中",
@@ -147,12 +129,10 @@
   "batchError": "失败",
   "batchErrorMsg": "分析失败",
   "batchClear": "清空列表",
-
   "cropTitle": "裁剪区域",
   "cropHint": "框选区域，不选则分析全图",
   "cropReset": "重置",
   "cropConfirm": "确认",
-
   "analyzedImage": "分析的图片",
   "summary": "一句话总结",
   "tags": "标签",
@@ -160,15 +140,12 @@
   "addTagPlaceholder": "输入标签名…",
   "noTags": "暂无标签",
   "noRecords": "暂无记录",
-
   "sourceClipboard": "剪贴板",
   "sourceDrag": "拖拽",
   "sourceUrl": "URL",
-
   "copy": "复制",
   "copied": "已复制",
   "copiedToClipboard": "已复制到剪贴板",
-
   "dismiss": "关闭",
   "error": "错误",
   "save": "保存",
@@ -179,36 +156,30 @@
   "changeIcon": "更改图标",
   "changeColor": "更改颜色",
   "copySuffix": " (副本)",
-
   "applyChanges": "应用更改",
   "applied": "已应用",
   "settingsSaved": "设置已保存",
-
   "collection": "收藏夹",
   "collectionsWithCount": "收藏夹 ({n})",
   "newCollection": "新建",
   "newCollectionDefault": "新建收藏夹",
   "noCollection": "暂无收藏夹",
   "saveToCollection": "保存到收藏夹",
-
   "favorites": "收藏",
   "favoriteAdded": "已添加到{name}",
   "favoriteRemoved": "已从{name}移除",
   "savedToCollection": "已保存到{name}",
   "removedFromCollection": "已从{name}移除",
-
   "historyClear": "清空",
   "searchPlaceholder": "搜索图片内容、标签…",
   "searchResults": "搜索结果 ({n})",
   "recordCount": "{n} 条记录",
   "noHistory": "暂无分析记录",
   "noHistorySearch": "未找到匹配的记录",
-
   "undo": "撤销",
   "undoAction": "撤销",
   "undoFavorite": "已取消收藏",
   "undoDelete": "已删除记录",
-
   "exportTxt": "导出 TXT",
   "exportSuccess": "导出成功",
   "exportFailed": "导出失败",
@@ -217,7 +188,6 @@
   "exportSectionSummary": "总结",
   "exportSectionTags": "标签",
   "exportSectionAnalysis": "分析内容",
-
   "fieldImageContent": "图片内容",
   "fieldDesignPurpose": "设计目的",
   "fieldDesignStyle": "设计风格",
@@ -225,7 +195,6 @@
   "fieldColorTypography": "配色排版",
   "fieldTakeaways": "可借鉴点",
   "fieldPrompt": "AI 生成 Prompt",
-
   "ocrEngineTab": "文字识别",
   "ocrEngineTitle": "OCR 识别引擎",
   "ocrEngineDesc": "选择最适合你的文字识别方式。切换后下次识别自动生效，无需重启。",
@@ -251,7 +220,6 @@
   "ocrEngineFallback": "当前系统不支持 Windows OCR，已自动切换为 Tesseract",
   "ocrEngineLangMissing": "系统未安装 {lang} 语言包，桌面可能无法识别该语言文字",
   "ocrEngineDownloadRequired": "请先在设置中下载 {engine} 模型文件",
-
   "ocrMode": "文字识别",
   "ocrRecognize": "开始识别",
   "ocrRecognizing": "识别中…",
@@ -260,7 +228,6 @@
   "ocrCopyText": "复制文字",
   "ocrLanguage": "识别语言",
   "ocrHint": "上传图片，点击「开始识别」提取图片中的文字",
-
   "pluginManagerTab": "插件管理",
   "pluginManagerTitle": "插件管理",
   "pluginManagerDesc": "下载和安装插件以扩展功能。插件与主程序独立更新，互不影响。",
@@ -283,9 +250,9 @@
   "pluginLoading": "加载插件中…",
   "pluginLoadFailed": "插件加载失败",
   "pluginNoPlugins": "暂无已安装的插件",
-  "pluginRegistry": "插件市场",
+  "pluginRegistry": "插件管理",
   "pluginRegistryHint": "浏览更多可用插件",
-  "pluginRegistrySection": "插件市场",
+  "pluginRegistrySection": "插件管理",
   "pluginRegistryAllInstalled": "所有可用插件已安装",
   "pluginInstallFromUrl": "从链接安装",
   "settingsGeneralGroup": "通用设置",
@@ -293,5 +260,7 @@
   "pluginInstalledEnabled": "已启用",
   "pluginInstalledDisabled": "已禁用",
   "pluginUninstallFull": "彻底删除",
-  "pluginConfirmUninstall": "确认删除？"
+  "pluginConfirmUninstall": "确认删除？",
+  "pluginRegistryEmpty": "无法加载插件管理，请检查网络连接",
+  "pluginRegistryNoPlugins": "暂无可用插件"
 }

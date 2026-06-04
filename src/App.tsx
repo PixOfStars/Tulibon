@@ -384,9 +384,11 @@ const App = () => {
           collapsed={sidebarCollapsed}
           activeView={route.page === 'plugin' ? `plugin:${route.pluginId}` : 'home'}
           plugins={pluginNavItems}
+          sidebarOrder={prefs.config.sidebarOrder || []}
           onNavigate={handleSidebarNav}
           onOpenSettings={() => setSettingsOpen(true)}
           onResize={(w) => { setSidebarWidth(w); prefs.saveConfig({ ...prefs.config, sidebarWidth: w }); }}
+          onReorder={(newOrder) => prefs.saveConfig({ ...prefs.config, sidebarOrder: newOrder })}
           theme={theme}
           lang={prefs.config.prefLang}
         />

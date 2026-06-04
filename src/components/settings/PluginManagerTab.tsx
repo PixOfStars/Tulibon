@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { DownloadSimple, Trash, ToggleRight, ToggleLeft, PuzzlePiece, SpinnerGap, Warning, X } from '@phosphor-icons/react';
+import { DownloadSimple, Trash, ToggleRight, ToggleLeft, PuzzlePiece, SpinnerGap, Warning, X, House, Clock, MagnifyingGlass, Folders, Scan } from '@phosphor-icons/react';
 import { tauriInvoke, tauriListen } from '../../utils/tauri';
 import type { TabProps } from './TabProps';
 
@@ -35,6 +35,8 @@ interface InstallProgress {
   total_bytes: number | null;
   message?: string;
 }
+
+var ICON_NAME_MAP: Record<string, React.ComponentType<any>> = { House: House, Clock: Clock, MagnifyingGlass: MagnifyingGlass, Folders: Folders, Scan: Scan, PuzzlePiece: PuzzlePiece };
 
 const PluginManagerTab = ({ colors, lang, t }: TabProps) => {
   const [plugins, setPlugins] = useState<PluginEntry[]>([]);
@@ -306,9 +308,11 @@ const PluginManagerTab = ({ colors, lang, t }: TabProps) => {
               ({enabledPlugins.length})
             </span>
           </div>
-          {enabledPlugins.map((plugin) => (
+          {enabledPlugins.map((plugin) => {
+              var I = ICON_NAME_MAP[plugin.manifest.icon] || PuzzlePiece;
+              return (
             <div key={plugin.manifest.id} style={{ ...cardStyle, marginBottom: 6 }}>
-              <PuzzlePiece size={18} weight="bold" color={colors.accent} style={{ flexShrink: 0 }} />
+              <I size={18} weight="bold" color={colors.accent} style={{ flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: colors.textHeader }}>
                   {pluginLabel(plugin.manifest)}
@@ -317,15 +321,6 @@ const PluginManagerTab = ({ colors, lang, t }: TabProps) => {
                   v{plugin.manifest.version}
                 </div>
               </div>
-
-              {/* Status badge */}
-              <span style={{
-                fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 6,
-                backgroundColor: colors.success + '20', color: colors.success,
-                flexShrink: 0,
-              }}>
-                {t.pluginEnabled || 'Enabled'}
-              </span>
 
               {/* Toggle → disable */}
               <button
@@ -349,13 +344,12 @@ const PluginManagerTab = ({ colors, lang, t }: TabProps) => {
                   </button>
                 </div>
               ) : (
-                <button onClick={() => setConfirmUninstall(plugin.manifest.id)} style={btnStyle(true)}>
-                  <Trash size={12} weight="bold" />
-                  {t.pluginUninstallFull || 'Remove'}
+                <button onClick={() => setConfirmUninstall(plugin.manifest.id)} title={t.pluginUninstall || 'Uninstall'} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 2, flexShrink: 0 }}>
+                  <Trash size={18} weight="bold" color={colors.error} />
                 </button>
               )}
             </div>
-          ))}
+          ); })}
         </div>
       )}
 
@@ -369,9 +363,11 @@ const PluginManagerTab = ({ colors, lang, t }: TabProps) => {
               ({disabledPlugins.length})
             </span>
           </div>
-          {disabledPlugins.map((plugin) => (
+          {disabledPlugins.map((plugin) => {
+              var I = ICON_NAME_MAP[plugin.manifest.icon] || PuzzlePiece;
+              return (
             <div key={plugin.manifest.id} style={{ ...cardStyle, marginBottom: 6, opacity: 0.65 }}>
-              <PuzzlePiece size={18} weight="bold" color={colors.text} style={{ flexShrink: 0 }} />
+              <I size={18} weight="bold" color={colors.text} style={{ flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: colors.text }}>
                   {pluginLabel(plugin.manifest)}
@@ -380,15 +376,6 @@ const PluginManagerTab = ({ colors, lang, t }: TabProps) => {
                   v{plugin.manifest.version}
                 </div>
               </div>
-
-              {/* Status badge */}
-              <span style={{
-                fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 6,
-                backgroundColor: colors.errorBg, color: colors.error,
-                flexShrink: 0,
-              }}>
-                {t.pluginDisabled || 'Disabled'}
-              </span>
 
               {/* Toggle → enable */}
               <button
@@ -412,13 +399,12 @@ const PluginManagerTab = ({ colors, lang, t }: TabProps) => {
                   </button>
                 </div>
               ) : (
-                <button onClick={() => setConfirmUninstall(plugin.manifest.id)} style={btnStyle(true)}>
-                  <Trash size={12} weight="bold" />
-                  {t.pluginUninstallFull || 'Remove'}
+                <button onClick={() => setConfirmUninstall(plugin.manifest.id)} title={t.pluginUninstall || 'Uninstall'} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 2, flexShrink: 0 }}>
+                  <Trash size={18} weight="bold" color={colors.error} />
                 </button>
               )}
             </div>
-          ))}
+          ); })}
         </div>
       )}
     </div>
