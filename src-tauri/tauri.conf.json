@@ -38,7 +38,11 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": ["WebView2Loader.dll"],
+    "resources": {
+      "WebView2Loader.dll": "WebView2Loader.dll",
+      "../plugins": "plugins",
+      "../plugins.json": "plugins.json"
+    },
     "targets": ["nsis"],
     "windows": {
       "nsis": {

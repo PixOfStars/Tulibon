@@ -36,13 +36,15 @@ const PluginSettingsContainer = ({ pluginId, manifest, hostConfig }: PluginSetti
         script.src = scriptUrl;
         script.async = true;
 
-        await new Promise<void>((resolve, reject) => {
+        const loadPromise = new Promise<void>((resolve, reject) => {
           script.onload = () => resolve();
           script.onerror = () => reject(new Error(`Settings script load failed: ${scriptUrl}`));
         });
 
         document.head.appendChild(script);
         scriptRef.current = script;
+
+        await loadPromise;
 
         if (cancelled) return;
 
