@@ -1,0 +1,11 @@
+{
+  "version": "0.3.3",
+  "notes": "Release v0.3.3\n\n- fix: release script use master branch for releases repo",
+  "pub_date": "2026-06-04T12:01:52.106Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNWl6MlhsaXo0OUs3cFl3QnFXa0p4bzRFWFVIUDB3WllOQSs1TGZKdlNsZGpobS9wcXZ0L1pYN0tBZHpGWElkSUNNWWRaUDRoN2c2SXRpVWZwSkNUSkhaSUlMM1VEYXdVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNTc0MjIwCWZpbGU6QUktVmlzaW9uXzAuMy4zX3g2NC1zZXR1cC5leGUKb0lJcWhRUlNHcUdUWG8yS3lGZ3NTSUdDYUNKd3NlUUNqUzZlRHNmTmw4VkpleHg2dWZabUhNY0JteDRJWmIydW4xcXZXZjhoSXh5cmo1Vmt1VFZvQkE9PQo=",
+      "url": "https://github.com/PixOfStars/AI-Vision/releases/download/v0.3.3/AI-Vision_0.3.3_x64-setup.exe"
+    }
+  }
+}
