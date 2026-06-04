@@ -1,0 +1,48 @@
+[package]
+name = "ai-vision"
+version = "0.3.2"
+edition = "2021"
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png", "webview2-com"] }
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-shell = "2"
+tauri-plugin-updater = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+auto-launch = "0.5"
+arboard = "3"
+image = { version = "0.25", features = ["webp"] }
+windows = { version = "0.59", features = [
+  "Win32_Security_Cryptography",
+  "Win32_System_Registry",
+  "Win32_UI_WindowsAndMessaging",
+  "Win32_UI_Shell",
+  "Win32_Foundation",
+  "Win32_System_Com",
+  "Media_Ocr",
+  "Graphics_Imaging",
+  "Storage_Streams",
+  "Globalization",
+] }
+reqwest = { version = "0.12", features = ["stream"] }
+tokio = { version = "1", features = ["io-util", "fs"] }
+tokio-stream = "0.1"
+tokio-util = { version = "0.7", features = ["io"] }
+zip = "2"
+tempfile = "3"
+chrono = "0.4"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }

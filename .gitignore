@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.key
+*.key.pub
+.env
+.env.local
+src-tauri/target/
+.claude/*.json
+public/tesseract/*.traineddata.gz
+plugins/*.zip
