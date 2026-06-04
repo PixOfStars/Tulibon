@@ -5,12 +5,9 @@
 use std::fs;
 use std::path::PathBuf;
 use tauri::http::{Response, StatusCode};
-use tauri::Manager;
 
 fn app_data_dir(app: &tauri::AppHandle) -> PathBuf {
-    app.path()
-        .app_data_dir()
-        .unwrap_or_else(|_| PathBuf::from("."))
+    crate::app_paths::app_data_dir(app)
 }
 
 type HttpRequest = tauri::http::Request<Vec<u8>>;
@@ -26,7 +23,7 @@ fn error_response(status: StatusCode, msg: &str) -> HttpResponse {
 
 /// Handle plugin:// requests.
 /// URI format: plugin://{plugin_id}/{file_path}
-/// Example:  plugin://history/index.js  →  {app_data}/plugins/history/index.js (or source plugins/ dir as fallback)
+/// Example:  plugin://history/index.js  →  {exe_dir}/plugins/history/index.js (or bundled resource plugins/ as fallback)
 pub fn plugin_protocol(
     ctx: tauri::UriSchemeContext<'_, tauri::Wry>,
     request: HttpRequest,
@@ -40,34 +37,42 @@ pub fn plugin_protocol(
     let plugin_id = parts.next().unwrap_or("");
     let file_path = parts.next().unwrap_or("");
 
-    eprintln!("[plugin://] plugin_id={}, file_path={}", plugin_id, file_path);
+    eprintln!(
+        "[plugin://] plugin_id={}, file_path={}",
+        plugin_id, file_path
+    );
 
     if plugin_id.is_empty() || file_path.is_empty() {
         return error_response(StatusCode::BAD_REQUEST, "empty plugin_id or file_path");
     }
 
-    // Try app_data plugins first
-    let mut plugin_dir = app_data_dir(app).join("plugins").join(plugin_id);
-    let mut full_path = plugin_dir.join(file_path);
-    
-    // If not found in app_data, try source plugins directory (for built-in plugins in dev)
-    if !full_path.exists() {
-        eprintln!("[plugin://] Not found in app_data, trying source plugins dir");
-        let source_plugins = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .parent()
-            .map(|p| p.join("plugins"))
-            .map(|p| p.join(plugin_id));
-        
-        if let Some(source_dir) = source_plugins {
-            let source_path = source_dir.join(file_path);
-            if source_path.exists() {
-                eprintln!("[plugin://] Found in source dir: {}", source_path.display());
-                plugin_dir = source_dir;
-                full_path = source_path;
-            }
+    // Try portable plugins first, then bundled resources. The old source-tree
+    // fallback only works in development and is handled by app_paths in debug builds.
+    let portable_plugin_dir = app_data_dir(app).join("plugins").join(plugin_id);
+    let bundled_plugin_dir = crate::app_paths::bundled_plugins_dir(app).map(|p| p.join(plugin_id));
+
+    let mut candidates = vec![portable_plugin_dir];
+    if let Some(path) = bundled_plugin_dir {
+        candidates.push(path);
+    }
+
+    let mut selected = None;
+    for dir in candidates {
+        let path = dir.join(file_path);
+        if path.exists() {
+            selected = Some((dir, path));
+            break;
         }
     }
-    
+
+    let (plugin_dir, full_path) = match selected {
+        Some(paths) => paths,
+        None => {
+            eprintln!("[plugin://] file not found in portable plugins or bundled resources");
+            return error_response(StatusCode::NOT_FOUND, "file not found");
+        }
+    };
+
     eprintln!("[plugin://] plugin_dir={}", plugin_dir.display());
     eprintln!("[plugin://] full_path={}", full_path.display());
 

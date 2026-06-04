@@ -2,15 +2,13 @@
 // 插件管理器 — 安装/卸载/启用/禁用 插件生命周期命令
 // ===================================================================
 
-use std::fs;
-use std::path::PathBuf;
-use tauri::{Emitter, Manager};
 use crate::download;
+use std::fs;
+use std::path::{Path, PathBuf};
+use tauri::Emitter;
 
 fn app_data_dir(app: &tauri::AppHandle) -> PathBuf {
-    app.path()
-        .app_data_dir()
-        .unwrap_or_else(|_| PathBuf::from("."))
+    crate::app_paths::app_data_dir(app)
 }
 
 fn plugins_dir(app: &tauri::AppHandle) -> PathBuf {
@@ -74,7 +72,7 @@ pub struct RegistryEntry {
     pub name: serde_json::Value, // { zh, en }
     pub version: String,
     pub description: Option<serde_json::Value>, // { zh, en }
-    pub url: String,            // direct download URL for the plugin ZIP
+    pub url: String,                            // direct download URL for the plugin ZIP
     pub icon: String,
     #[serde(default)]
     pub order: i32,
@@ -88,6 +86,58 @@ fn read_manifest(plugin_dir: &std::path::Path) -> Option<PluginManifest> {
     serde_json::from_str::<PluginManifest>(&raw).ok()
 }
 
+fn copy_dir(src: &Path, dest: &Path) -> Result<(), String> {
+    fs::create_dir_all(dest).map_err(|e| format!("创建目录失败: {}", e))?;
+    for entry in fs::read_dir(src).map_err(|e| format!("读取目录失败: {}", e))? {
+        let entry = entry.map_err(|e| format!("读取目录条目失败: {}", e))?;
+        let src_path = entry.path();
+        let dest_path = dest.join(entry.file_name());
+        if src_path.is_dir() {
+            copy_dir(&src_path, &dest_path)?;
+        } else if src_path.is_file() {
+            fs::copy(&src_path, &dest_path).map_err(|e| format!("复制文件失败: {}", e))?;
+        }
+    }
+    Ok(())
+}
+
+pub fn ensure_bundled_plugins(app: &tauri::AppHandle) -> Result<(), String> {
+    let Some(bundled_root) = crate::app_paths::bundled_plugins_dir(app) else {
+        return Ok(());
+    };
+
+    let plugins_root = plugins_dir(app);
+    fs::create_dir_all(&plugins_root).map_err(|e| format!("创建插件目录失败: {}", e))?;
+
+    for entry in fs::read_dir(&bundled_root).map_err(|e| format!("读取内置插件目录失败: {}", e))?
+    {
+        let entry = entry.map_err(|e| format!("读取内置插件条目失败: {}", e))?;
+        let source_dir = entry.path();
+        if !source_dir.is_dir() {
+            continue;
+        }
+
+        let Some(source_manifest) = read_manifest(&source_dir) else {
+            continue;
+        };
+
+        let dest_dir = plugins_root.join(&source_manifest.id);
+        let should_copy = match read_manifest(&dest_dir) {
+            Some(existing) => existing.version != source_manifest.version,
+            None => true,
+        };
+
+        if should_copy {
+            if dest_dir.exists() {
+                fs::remove_dir_all(&dest_dir).map_err(|e| format!("更新内置插件失败: {}", e))?;
+            }
+            copy_dir(&source_dir, &dest_dir)?;
+        }
+    }
+
+    Ok(())
+}
+
 fn get_enabled_state(app: &tauri::AppHandle, plugin_id: &str) -> bool {
     let config_dir = app_data_dir(app).join("data");
     let config_path = config_dir.join("config.json");
@@ -95,7 +145,10 @@ fn get_enabled_state(app: &tauri::AppHandle, plugin_id: &str) -> bool {
         if let Ok(config) = serde_json::from_str::<serde_json::Value>(&raw) {
             if let Some(states) = config.get("pluginStates") {
                 if let Some(state) = states.get(plugin_id) {
-                    return state.get("enabled").and_then(|v| v.as_bool()).unwrap_or(true);
+                    return state
+                        .get("enabled")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(true);
                 }
             }
         }
@@ -107,10 +160,8 @@ fn set_enabled_state(app: &tauri::AppHandle, plugin_id: &str, enabled: bool) -> 
     let config_dir = app_data_dir(app).join("data");
     let config_path = config_dir.join("config.json");
     let mut config: serde_json::Value = if config_path.exists() {
-        let raw = fs::read_to_string(&config_path)
-            .map_err(|e| format!("读取配置失败: {}", e))?;
-        serde_json::from_str(&raw)
-            .map_err(|e| format!("解析配置失败: {}", e))?
+        let raw = fs::read_to_string(&config_path).map_err(|e| format!("读取配置失败: {}", e))?;
+        serde_json::from_str(&raw).map_err(|e| format!("解析配置失败: {}", e))?
     } else {
         serde_json::json!({})
     };
@@ -129,8 +180,14 @@ fn set_enabled_state(app: &tauri::AppHandle, plugin_id: &str, enabled: bool) -> 
 
     state["enabled"] = serde_json::Value::Bool(enabled);
 
-    fs::write(&config_path, serde_json::to_string_pretty(&config).unwrap_or_default())
-        .map_err(|e| format!("保存配置失败: {}", e))?;
+    if let Some(parent) = config_path.parent() {
+        fs::create_dir_all(parent).map_err(|e| format!("创建配置目录失败: {}", e))?;
+    }
+    fs::write(
+        &config_path,
+        serde_json::to_string_pretty(&config).unwrap_or_default(),
+    )
+    .map_err(|e| format!("保存配置失败: {}", e))?;
 
     Ok(())
 }
@@ -167,23 +224,17 @@ pub fn list_plugins(app: tauri::AppHandle) -> Result<Vec<PluginListEntry>, Strin
 }
 
 #[tauri::command]
-pub async fn install_plugin(
-    app: tauri::AppHandle,
-    url: String,
-) -> Result<PluginListEntry, String> {
+pub async fn install_plugin(app: tauri::AppHandle, url: String) -> Result<PluginListEntry, String> {
     let plugins_root = plugins_dir(&app);
-    fs::create_dir_all(&plugins_root)
-        .map_err(|e| format!("创建插件目录失败: {}", e))?;
+    fs::create_dir_all(&plugins_root).map_err(|e| format!("创建插件目录失败: {}", e))?;
 
     // Build mirror URLs
     let urls = crate::download::build_download_urls(&url);
 
     // Create temp dir
-    let temp_dir = tempfile::tempdir()
-        .map_err(|e| format!("创建临时目录失败: {}", e))?;
+    let temp_dir = tempfile::tempdir().map_err(|e| format!("创建临时目录失败: {}", e))?;
     let temp_extract = temp_dir.path().join("plugin_extract");
-    fs::create_dir_all(&temp_extract)
-        .map_err(|e| format!("创建临时目录失败: {}", e))?;
+    fs::create_dir_all(&temp_extract).map_err(|e| format!("创建临时目录失败: {}", e))?;
 
     // Emit progress to frontend
     let app_handle = app.clone();
@@ -240,10 +291,15 @@ pub async fn install_plugin(
                 }
             }
             Err(e) => {
-                let stage = if e.is_connect() { "DNS/TCP" }
-                    else if e.is_timeout() { "超时" }
-                    else if e.is_request() { "TLS/发送" }
-                    else { "其他" };
+                let stage = if e.is_connect() {
+                    "DNS/TCP"
+                } else if e.is_timeout() {
+                    "超时"
+                } else if e.is_request() {
+                    "TLS/发送"
+                } else {
+                    "其他"
+                };
                 errors.push((url.to_string(), format!("[{}] {}", stage, e)));
             }
         }
@@ -264,8 +320,7 @@ pub async fn install_plugin(
 
     // Save ZIP to temp file
     let tmp_zip_path = temp_dir.path().join("plugin.zip");
-    fs::write(&tmp_zip_path, &zip_bytes)
-        .map_err(|e| format!("写入临时 ZIP 失败: {}", e))?;
+    fs::write(&tmp_zip_path, &zip_bytes).map_err(|e| format!("写入临时 ZIP 失败: {}", e))?;
 
     // Extract
     on_progress(download::DownloadProgress {
@@ -278,11 +333,12 @@ pub async fn install_plugin(
     });
 
     let zip_cursor = std::io::Cursor::new(&zip_bytes);
-    let mut archive = zip::ZipArchive::new(zip_cursor)
-        .map_err(|e| format!("ZIP 解析失败: {}", e))?;
+    let mut archive =
+        zip::ZipArchive::new(zip_cursor).map_err(|e| format!("ZIP 解析失败: {}", e))?;
 
     for i in 0..archive.len() {
-        let mut entry = archive.by_index(i)
+        let mut entry = archive
+            .by_index(i)
             .map_err(|e| format!("读取 ZIP 条目 {} 失败: {}", i, e))?;
         let entry_name = entry.name().to_string();
         let entry_path = temp_extract.join(&entry_name);
@@ -290,17 +346,14 @@ pub async fn install_plugin(
             return Err(format!("非法 ZIP 条目路径: {}", entry_name));
         }
         if entry.is_dir() {
-            fs::create_dir_all(&entry_path)
-                .map_err(|e| format!("创建目录失败: {}", e))?;
+            fs::create_dir_all(&entry_path).map_err(|e| format!("创建目录失败: {}", e))?;
         } else {
             if let Some(parent) = entry_path.parent() {
-                fs::create_dir_all(parent)
-                    .map_err(|e| format!("创建父目录失败: {}", e))?;
+                fs::create_dir_all(parent).map_err(|e| format!("创建父目录失败: {}", e))?;
             }
-            let mut out = fs::File::create(&entry_path)
-                .map_err(|e| format!("创建文件失败: {}", e))?;
-            std::io::copy(&mut entry, &mut out)
-                .map_err(|e| format!("解压文件失败: {}", e))?;
+            let mut out =
+                fs::File::create(&entry_path).map_err(|e| format!("创建文件失败: {}", e))?;
+            std::io::copy(&mut entry, &mut out).map_err(|e| format!("解压文件失败: {}", e))?;
         }
     }
 
@@ -322,8 +375,7 @@ pub async fn install_plugin(
 
     let plugin_dir = plugins_root.join(&manifest.id);
     if plugin_dir.exists() {
-        fs::remove_dir_all(&plugin_dir)
-            .map_err(|e| format!("删除旧插件版本失败: {}", e))?;
+        fs::remove_dir_all(&plugin_dir).map_err(|e| format!("删除旧插件版本失败: {}", e))?;
     }
 
     // Copy extracted content to plugin dir
@@ -342,22 +394,6 @@ pub async fn install_plugin(
         temp_extract.clone()
     };
 
-    fn copy_dir(src: &PathBuf, dest: &PathBuf) -> Result<(), String> {
-        fs::create_dir_all(dest).map_err(|e| format!("创建目录失败: {}", e))?;
-        if let Ok(entries) = fs::read_dir(src) {
-            for entry in entries.flatten() {
-                let src_path = entry.path();
-                let dest_path = dest.join(entry.file_name());
-                if src_path.is_dir() {
-                    copy_dir(&src_path, &dest_path)?;
-                } else if src_path.is_file() {
-                    fs::copy(&src_path, &dest_path)
-                        .map_err(|e| format!("复制文件失败: {}", e))?;
-                }
-            }
-        }
-        Ok(())
-    }
     copy_dir(&source_dir, &plugin_dir)?;
 
     // Default to enabled
@@ -384,8 +420,7 @@ pub async fn install_plugin(
 pub fn uninstall_plugin(app: tauri::AppHandle, id: String) -> Result<(), String> {
     let plugin_dir = plugins_dir(&app).join(&id);
     if plugin_dir.exists() {
-        fs::remove_dir_all(&plugin_dir)
-            .map_err(|e| format!("删除插件失败: {}", e))?;
+        fs::remove_dir_all(&plugin_dir).map_err(|e| format!("删除插件失败: {}", e))?;
     }
     // Clean up plugin config file
     let config_path = plugin_config_path(&app, &id);
@@ -437,45 +472,69 @@ pub fn get_plugin(app: tauri::AppHandle, id: String) -> Result<Option<PluginList
 pub fn get_cached_registry(app: tauri::AppHandle) -> Result<Vec<RegistryEntry>, String> {
     let path = registry_cache_path(&app);
     if path.exists() {
-        let raw = fs::read_to_string(&path)
-            .map_err(|e| format!("读取缓存注册表失败: {}", e))?;
-        serde_json::from_str(&raw)
-            .map_err(|e| format!("解析注册表失败: {}", e))
-    } else {
-        Ok(Vec::new())
+        let raw = fs::read_to_string(&path).map_err(|e| format!("读取缓存注册表失败: {}", e))?;
+        return serde_json::from_str(&raw).map_err(|e| format!("解析注册表失败: {}", e));
     }
+
+    if let Some(path) = crate::app_paths::bundled_registry_path(&app) {
+        let raw = fs::read_to_string(&path).map_err(|e| format!("读取内置注册表失败: {}", e))?;
+        return serde_json::from_str(&raw).map_err(|e| format!("解析内置注册表失败: {}", e));
+    }
+
+    Ok(Vec::new())
 }
 
 #[tauri::command]
 pub async fn fetch_registry(app: tauri::AppHandle) -> Result<Vec<RegistryEntry>, String> {
-    let client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(15))
-        .no_proxy()
-        .build()
-        .map_err(|e| format!("创建 HTTP 客户端失败: {}", e))?;
+    let fetch_result = async {
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(15))
+            .no_proxy()
+            .build()
+            .map_err(|e| format!("创建 HTTP 客户端失败: {}", e))?;
 
-    let response = client
-        .get(REGISTRY_URL)
-        .send()
-        .await
-        .map_err(|e| format!("获取注册表失败: {}", e))?;
+        let response = client
+            .get(REGISTRY_URL)
+            .send()
+            .await
+            .map_err(|e| format!("获取注册表失败: {}", e))?;
 
-    let body = response
-        .text()
-        .await
-        .map_err(|e| format!("读取注册表响应失败: {}", e))?;
+        if !response.status().is_success() {
+            return Err(format!(
+                "获取注册表失败: HTTP {}",
+                response.status().as_u16()
+            ));
+        }
 
-    let entries: Vec<RegistryEntry> =
-        serde_json::from_str(&body).map_err(|e| format!("解析注册表失败: {}", e))?;
+        let body = response
+            .text()
+            .await
+            .map_err(|e| format!("读取注册表响应失败: {}", e))?;
 
-    // Cache to disk
-    let cache_path = registry_cache_path(&app);
-    if let Some(parent) = cache_path.parent() {
-        fs::create_dir_all(parent).map_err(|e| format!("创建缓存目录失败: {}", e))?;
+        let entries: Vec<RegistryEntry> =
+            serde_json::from_str(&body).map_err(|e| format!("解析注册表失败: {}", e))?;
+
+        let cache_path = registry_cache_path(&app);
+        if let Some(parent) = cache_path.parent() {
+            fs::create_dir_all(parent).map_err(|e| format!("创建缓存目录失败: {}", e))?;
+        }
+        fs::write(&cache_path, &body).map_err(|e| format!("缓存注册表失败: {}", e))?;
+
+        Ok(entries)
     }
-    fs::write(&cache_path, &body).map_err(|e| format!("缓存注册表失败: {}", e))?;
+    .await;
 
-    Ok(entries)
+    match fetch_result {
+        Ok(entries) => Ok(entries),
+        Err(err) => {
+            let fallback = get_cached_registry(app)?;
+            if fallback.is_empty() {
+                Err(err)
+            } else {
+                Ok(fallback)
+            }
+        }
+    }
 }
 
 // ── Plugin config commands ──
@@ -490,8 +549,7 @@ pub fn get_plugin_config(
     if !path.exists() {
         return Ok(None);
     }
-    let raw = fs::read_to_string(&path)
-        .map_err(|e| format!("读取插件配置失败: {}", e))?;
+    let raw = fs::read_to_string(&path).map_err(|e| format!("读取插件配置失败: {}", e))?;
     let config: serde_json::Value =
         serde_json::from_str(&raw).map_err(|e| format!("解析插件配置失败: {}", e))?;
     Ok(config.get(&key).cloned())
@@ -506,8 +564,7 @@ pub fn set_plugin_config(
 ) -> Result<(), String> {
     let path = plugin_config_path(&app, &plugin_id);
     let mut config: serde_json::Value = if path.exists() {
-        let raw = fs::read_to_string(&path)
-            .map_err(|e| format!("读取插件配置失败: {}", e))?;
+        let raw = fs::read_to_string(&path).map_err(|e| format!("读取插件配置失败: {}", e))?;
         serde_json::from_str(&raw).map_err(|e| format!("解析插件配置失败: {}", e))?
     } else {
         if let Some(parent) = path.parent() {
@@ -520,8 +577,11 @@ pub fn set_plugin_config(
         obj.insert(key, value);
     }
 
-    fs::write(&path, serde_json::to_string_pretty(&config).unwrap_or_default())
-        .map_err(|e| format!("保存插件配置失败: {}", e))?;
+    fs::write(
+        &path,
+        serde_json::to_string_pretty(&config).unwrap_or_default(),
+    )
+    .map_err(|e| format!("保存插件配置失败: {}", e))?;
 
     Ok(())
 }
