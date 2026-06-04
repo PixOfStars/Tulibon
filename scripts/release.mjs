@@ -159,10 +159,10 @@ function pushFile(path, content, commitMsg) {
   const encoded = Buffer.from(content).toString('base64');
   let existingSha = '';
   try {
-    const getResult = JSON.parse(ghApi(`repos/PixOfStars/AI-Vision/contents/${path}?ref=main`));
+    const getResult = JSON.parse(ghApi(`repos/PixOfStars/AI-Vision/contents/${path}?ref=master`));
     existingSha = getResult.sha;
   } catch {}
-  const payload = { message: commitMsg, content: encoded, branch: 'main' };
+  const payload = { message: commitMsg, content: encoded, branch: 'master' };
   if (existingSha) payload.sha = existingSha;
   const tmpPayload = join(root, '..', '.tmp-payload.json');
   writeFileSync(tmpPayload, JSON.stringify(payload));
@@ -200,7 +200,7 @@ if (existsSync(localChangelogPath)) {
   const changelogEntry = `## ${tag} (${new Date().toISOString().slice(0, 10)})\n\n${changelog}\n\n`;
   let existingChangelog = '';
   try {
-    const getResult = JSON.parse(ghApi('repos/PixOfStars/AI-Vision/contents/CHANGELOG.md?ref=main'));
+    const getResult = JSON.parse(ghApi('repos/PixOfStars/AI-Vision/contents/CHANGELOG.md?ref=master'));
     existingChangelog = Buffer.from(getResult.content, 'base64').toString('utf8');
   } catch {}
   let newChangelog;
