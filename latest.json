@@ -1,11 +1,11 @@
 {
-  "version": "0.30.6",
-  "notes": "Release v0.30.6\n\n- Fix: AboutTab type standalone + crate name Tulibon rename\n- Tulibon v0.30.5",
-  "pub_date": "2026-06-05T03:36:03.887Z",
+  "version": "0.30.7",
+  "notes": "Release v0.30.7\n\n- fix: 8 comprehensive fixes for v0.30.7\n- Bump version to 0.30.6\n- Fix: AboutTab type standalone + crate name Tulibon rename\n- Update changelog for v0.30.6\n- Update README for v0.30.6\n- Release v0.30.6\n- Tulibon v0.30.5",
+  "pub_date": "2026-06-05T05:18:33.052Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNWl6MlhsaXo0OVA0QlNFZVlzYisxTGNMejFGcmJCK0l6MU1QYkUyZGx4eDd6S1NBS1FRQ0NkNFNPSVo3aERYVDZNc1VJbzFDMEJjMlM3UFE2V2pTdWVtY2lNcFJMbGdJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNjMwNTQ5CWZpbGU6VHVsaWJvbl8wLjMwLjZfeDY0LXNldHVwLmV4ZQpRa0t1L0xuU05nUVNGMVFLZW9BM3BHYS9PRE5KaHkrUTNocVEyR3N4Tjh4U1hxU2h0ZHY0aGtCT24zaitVOXA0WVd3c2ovSW1qRTZKS3VIS2Z0enRBdz09Cg==",
-      "url": "https://github.com/PixOfStars/Tulibon/releases/download/v0.30.6/Tulibon_0.30.6_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNWl6MlhsaXo0OUY5QzJyZGhqL3ZCcnNvaE9DQkxmcWRFU29HZi9PZENvelRBTEkyQ2w4VHQ0VG5OY2FJZVptNi9KNzBpM0RCR1ZJOTZjMlBzazdaZHlvUktpa056Wnd3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNjM2NzA2CWZpbGU6VHVsaWJvbl8wLjMwLjdfeDY0LXNldHVwLmV4ZQpKeW9LaUFlNnJ0b1JqNEJ2alZIZXUzb3IzaUVkSE8vU1MwTTFmTUtLTi9tbnVlZE1XMWMvekFwWXFCcksrUUNBT3NRQzU1Q3E3dkxjandpby9hV21Edz09Cg==",
+      "url": "https://github.com/PixOfStars/Tulibon/releases/download/v0.30.7/Tulibon_0.30.7_x64-setup.exe"
     }
   }
 }
