@@ -1,11 +1,11 @@
 {
-  "version": "0.30.5",
-  "notes": "Release v0.30.5\n\n- fix: bundle plugins with portable app data\n- chore: update Cargo.lock after v0.30.4 build\n- Bump version to 0.30.4\n- Update changelog for v0.30.4\n- Update README for v0.30.4\n- Release v0.30.4",
-  "pub_date": "2026-06-04T14:32:25.526Z",
+  "version": "0.30.6",
+  "notes": "Release v0.30.6\n\n- Fix: AboutTab type standalone + crate name Tulibon rename\n- Tulibon v0.30.5",
+  "pub_date": "2026-06-05T03:36:03.887Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNWl6MlhsaXo0OU1MOXdTYzJiL1cyR25Hb1hsWnB5cVZ4bGtVQ29pd0kwMnNmeWhUWkZlTG1wMnZqYTZKd1ZMb210RUFMR1N0QzdaVWxyVnN1WVNXdDh2cDNGTmt1cndVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNTgzNTE4CWZpbGU6QUktVmlzaW9uXzAuMzAuNV94NjQtc2V0dXAuZXhlCnhER1pxM1BldDVGMngzbnJPWEp2cm1oR2JHOU45YW01TXh2c2QrWWY4anNVQ2hLdmhGcHExNFdoTVRuRmdCcHhhZTJxL2I1ZE9pWkx0L0ZSaFN5eUNnPT0K",
-      "url": "https://github.com/PixOfStars/Tulibon/releases/download/v0.30.5/Tulibon_0.30.5_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNWl6MlhsaXo0OVA0QlNFZVlzYisxTGNMejFGcmJCK0l6MU1QYkUyZGx4eDd6S1NBS1FRQ0NkNFNPSVo3aERYVDZNc1VJbzFDMEJjMlM3UFE2V2pTdWVtY2lNcFJMbGdJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwNjMwNTQ5CWZpbGU6VHVsaWJvbl8wLjMwLjZfeDY0LXNldHVwLmV4ZQpRa0t1L0xuU05nUVNGMVFLZW9BM3BHYS9PRE5KaHkrUTNocVEyR3N4Tjh4U1hxU2h0ZHY0aGtCT24zaitVOXA0WVd3c2ovSW1qRTZKS3VIS2Z0enRBdz09Cg==",
+      "url": "https://github.com/PixOfStars/Tulibon/releases/download/v0.30.6/Tulibon_0.30.6_x64-setup.exe"
     }
   }
 }
