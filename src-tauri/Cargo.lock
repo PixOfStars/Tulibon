@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "Tulibon"
-version = "0.30.6"
+version = "0.30.7"
 dependencies = [
  "arboard",
  "auto-launch",
