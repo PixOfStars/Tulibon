@@ -46,26 +46,9 @@ impl MirrorCache {
 
 static MIRROR_CACHE: std::sync::Mutex<Option<MirrorCache>> = std::sync::Mutex::new(None);
 
-/// 内置 GitHub 加速镜像前缀（按优先级排列）
-const MIRROR_PREFIXES: &[&str] = &[
-    "",                                                           // 直连 GitHub 需要实际 URL
-    "https://ghproxy.com/",
-    "https://mirror.ghproxy.com/",
-    "https://gh.api.99988866.xyz/",
-];
-
-/// 生成带镜像前缀的完整下载 URL 列表
+/// 只返回原始 GitHub URL（已移除不可靠的第三方镜像）
 pub fn build_download_urls(release_url: &str) -> Vec<String> {
-    let mut urls = Vec::new();
-    // 原生 URL 放首位（最快路径）
-    urls.push(release_url.to_string());
-    // 镜像
-    for prefix in MIRROR_PREFIXES {
-        if !prefix.is_empty() {
-            urls.push(format!("{}{}", prefix, release_url.trim_start_matches("https://")));
-        }
-    }
-    urls
+    vec![release_url.to_string()]
 }
 
 /// HEAD 预检：并行测试各镜像的可用性和延迟

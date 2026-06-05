@@ -7,7 +7,7 @@ use arboard::Clipboard;
 use base64::Engine;
 use image::{ImageBuffer, ImageFormat, Rgba};
 use plugin_manager::{
-    disable_plugin, enable_plugin, ensure_bundled_plugins, fetch_registry, get_cached_registry,
+    disable_plugin, enable_plugin, fetch_registry, get_cached_registry,
     get_plugin, get_plugin_config, get_plugin_state, install_plugin, list_plugins,
     read_plugin_file, set_plugin_config, uninstall_plugin,
 };
@@ -667,7 +667,7 @@ pub fn run() {
             let _ = fs::create_dir_all(base.join("cache"));
             let _ = fs::create_dir_all(base.join("plugins"));
             let _ = fs::create_dir_all(get_data_dir(app.handle()));
-            let _ = ensure_bundled_plugins(app.handle());
+            // Plugins are now user-installed from registry (no longer bundled)
 
             // Auto-migrate old JSON data files from root to data/ subdirectory
             let old_config = base.join("config.json");

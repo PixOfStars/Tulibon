@@ -1,100 +1,75 @@
-(function () {
-  var sdk = window.__PLUGIN_SDK__;
-  if (!sdk) return;
-
-  var React = sdk.lib.React;
-  var ReactDOM = sdk.lib.ReactDOM;
-  var useState = React.useState;
-  var useEffect = React.useEffect;
-
-  var lang = sdk.host.lang;
-  var colors = sdk.host.theme.colors;
-  var T = {
-    title: lang === 'zh' ? '收藏夹设置' : 'Collections Settings',
-    defaultView: lang === 'zh' ? '默认视图' : 'Default View',
-    grid: lang === 'zh' ? '网格' : 'Grid',
-    list: lang === 'zh' ? '列表' : 'List',
-    showEmpty: lang === 'zh' ? '显示空收藏夹' : 'Show Empty Collections',
-    confirmDelete: lang === 'zh' ? '删除前确认' : 'Confirm Before Delete',
-    save: lang === 'zh' ? '保存' : 'Save',
-    saved: lang === 'zh' ? '✓ 已保存' : '✓ Saved',
+(() => {
+  const sdk = window.__PLUGIN_SDK__;
+  if (!sdk) throw new Error("Plugin SDK not available");
+  const React = sdk.lib.React;
+  const ReactDOM = sdk.lib.ReactDOM;
+  const PluginDropdown = sdk.lib.PluginDropdown;
+  const { useState, useEffect } = React;
+  const lang = sdk.host.lang;
+  const colors = sdk.host.theme.colors;
+  const T = {
+    title: lang === "zh" ? "\u6536\u85CF\u5939\u8BBE\u7F6E" : "Collections Settings",
+    defaultView: lang === "zh" ? "\u9ED8\u8BA4\u89C6\u56FE" : "Default View",
+    grid: lang === "zh" ? "\u7F51\u683C" : "Grid",
+    list: lang === "zh" ? "\u5217\u8868" : "List",
+    showEmpty: lang === "zh" ? "\u663E\u793A\u7A7A\u6536\u85CF\u5939" : "Show Empty Collections",
+    confirmDelete: lang === "zh" ? "\u5220\u9664\u524D\u786E\u8BA4" : "Confirm Before Delete",
+    save: lang === "zh" ? "\u4FDD\u5B58" : "Save",
+    saved: lang === "zh" ? "\u2713 \u5DF2\u4FDD\u5B58" : "\u2713 Saved"
   };
-
+  const VIEW_OPTIONS = [
+    { value: "list", label: T.list },
+    { value: "grid", label: T.grid }
+  ];
   function SettingsView() {
-    var _v = useState('list'), defaultView = _v[0], setDefaultView = _v[1];
-    var _e = useState(true), showEmpty = _e[0], setShowEmpty = _e[1];
-    var _c = useState(true), confirmDelete = _c[0], setConfirmDelete = _c[1];
-    var _s = useState(false), saved = _s[0], setSaved = _s[1];
-
-    useEffect(function () {
-      sdk.config.get('defaultView').then(function (v) { if (v) setDefaultView(v); });
-      sdk.config.get('showEmpty').then(function (v) { if (v !== null) setShowEmpty(Boolean(v)); });
-      sdk.config.get('confirmDelete').then(function (v) { if (v !== null) setConfirmDelete(Boolean(v)); });
+    const [defaultView, setDefaultView] = useState("list");
+    const [showEmpty, setShowEmpty] = useState(true);
+    const [confirmDelete, setConfirmDelete] = useState(true);
+    const [saved, setSaved] = useState(false);
+    useEffect(() => {
+      sdk.config.get("defaultView").then((v) => {
+        if (v) setDefaultView(v);
+      });
+      sdk.config.get("showEmpty").then((v) => {
+        if (v !== null) setShowEmpty(Boolean(v));
+      });
+      sdk.config.get("confirmDelete").then((v) => {
+        if (v !== null) setConfirmDelete(Boolean(v));
+      });
     }, []);
-
-    var handleSave = function () {
+    const handleSave = () => {
       Promise.all([
-        sdk.config.set('defaultView', defaultView),
-        sdk.config.set('showEmpty', showEmpty),
-        sdk.config.set('confirmDelete', confirmDelete),
-      ]).then(function () {
+        sdk.config.set("defaultView", defaultView),
+        sdk.config.set("showEmpty", showEmpty),
+        sdk.config.set("confirmDelete", confirmDelete)
+      ]).then(() => {
         setSaved(true);
-        setTimeout(function () { setSaved(false); }, 2000);
+        setTimeout(() => setSaved(false), 2e3);
       });
     };
-
-    var selectStyle = {
-      padding: '6px 10px', borderRadius: 6, border: '1px solid ' + colors.border,
-      backgroundColor: colors.grayBg, color: colors.text, fontSize: 12, outline: 'none',
+    const accentBtn = {
+      padding: "8px 20px",
+      borderRadius: 8,
+      border: "none",
+      cursor: "pointer",
+      backgroundColor: colors.accent,
+      color: "#000",
+      fontSize: 12,
+      fontWeight: 700
     };
-    var accentBtn = {
-      padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer',
-      backgroundColor: colors.accent, color: '#000', fontSize: 12, fontWeight: 700,
-    };
-    var labelStyle = { display: 'block', fontSize: 12, fontWeight: 600, color: colors.text, marginBottom: 6 };
-    var rowStyle = { marginBottom: 18 };
-
-    return React.createElement('div', { style: { padding: 4 } },
-      React.createElement('h3', { style: { fontSize: 14, fontWeight: 700, color: colors.textHeader, marginBottom: 20 } }, T.title),
-
-      React.createElement('div', { style: rowStyle },
-        React.createElement('label', { style: labelStyle }, T.defaultView),
-        React.createElement('select', {
-          value: defaultView,
-          onChange: function (e) { setDefaultView(e.target.value); },
-          style: selectStyle,
-        },
-          React.createElement('option', { value: 'list' }, T.list),
-          React.createElement('option', { value: 'grid' }, T.grid)
-        )
-      ),
-
-      React.createElement('div', { style: rowStyle },
-        React.createElement('label', { style: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: colors.text, cursor: 'pointer' } },
-          React.createElement('input', { type: 'checkbox', checked: showEmpty, onChange: function (e) { setShowEmpty(e.target.checked); } }),
-          T.showEmpty
-        )
-      ),
-
-      React.createElement('div', { style: rowStyle },
-        React.createElement('label', { style: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: colors.text, cursor: 'pointer' } },
-          React.createElement('input', { type: 'checkbox', checked: confirmDelete, onChange: function (e) { setConfirmDelete(e.target.checked); } }),
-          T.confirmDelete
-        )
-      ),
-
-      React.createElement('button', { onClick: handleSave, style: accentBtn },
-        saved ? T.saved : T.save
-      )
-    );
+    const labelStyle = { display: "block", fontSize: 12, fontWeight: 600, color: colors.text, marginBottom: 6 };
+    const rowStyle = { marginBottom: 18 };
+    return /* @__PURE__ */ React.createElement("div", { style: { padding: 4 } }, /* @__PURE__ */ React.createElement("h3", { style: { fontSize: 14, fontWeight: 700, color: colors.textHeader, marginBottom: 20 } }, T.title), /* @__PURE__ */ React.createElement("div", { style: rowStyle }, /* @__PURE__ */ React.createElement("label", { style: labelStyle }, T.defaultView), /* @__PURE__ */ React.createElement("div", { style: { minWidth: 180 } }, /* @__PURE__ */ React.createElement(PluginDropdown, { options: VIEW_OPTIONS, value: defaultView, onChange: setDefaultView, colors }))), /* @__PURE__ */ React.createElement("div", { style: rowStyle }, /* @__PURE__ */ React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: colors.text, cursor: "pointer" } }, /* @__PURE__ */ React.createElement("input", { type: "checkbox", checked: showEmpty, onChange: (e) => setShowEmpty(e.target.checked) }), T.showEmpty)), /* @__PURE__ */ React.createElement("div", { style: rowStyle }, /* @__PURE__ */ React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: colors.text, cursor: "pointer" } }, /* @__PURE__ */ React.createElement("input", { type: "checkbox", checked: confirmDelete, onChange: (e) => setConfirmDelete(e.target.checked) }), T.confirmDelete)), /* @__PURE__ */ React.createElement("button", { onClick: handleSave, style: accentBtn }, saved ? T.saved : T.save));
   }
-
-  sdk.ui.mount = function (container) {
-    var root = ReactDOM.createRoot(container);
-    root.render(React.createElement(SettingsView));
+  sdk.ui.mount = (container) => {
+    const root = ReactDOM.createRoot(container);
+    root.render(/* @__PURE__ */ React.createElement(SettingsView, null));
     sdk.ui._root = root;
   };
-  sdk.ui.unmount = function () {
-    if (sdk.ui._root) { sdk.ui._root.unmount(); delete sdk.ui._root; }
+  sdk.ui.unmount = () => {
+    if (sdk.ui._root) {
+      sdk.ui._root.unmount();
+      delete sdk.ui._root;
+    }
   };
 })();

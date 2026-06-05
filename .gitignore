@@ -14,8 +14,6 @@ CLAUDE.md
 .githooks/
 tsconfig.app.tsbuildinfo
 
-# ── Build / release scripts (local only) ──
-scripts/
 
 # ── Auto-generated (rebuild on tauri build) ──
 src-tauri/gen/

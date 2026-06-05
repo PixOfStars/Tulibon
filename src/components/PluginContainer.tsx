@@ -114,6 +114,7 @@ const PluginContainer = ({ pluginId, manifest, hostConfig, onError }: PluginCont
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
+    position: 'relative',
   };
 
   if (state === 'error') {

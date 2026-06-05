@@ -159,7 +159,6 @@ const Sidebar = ({
     userSelect: 'none', WebkitUserSelect: 'none',
   });
 
-  const dropLineStyle = { height: 2, borderRadius: 1, backgroundColor: colors.accent, margin: '0 8px', flexShrink: 0 };
 
   const activeIndicator: React.CSSProperties = {
     position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
@@ -196,73 +195,61 @@ const Sidebar = ({
           );
         })}
 
-        {/* Plugin separator — only show if there are plugins */}
-        {sortedPlugins.length > 0 && (
-          <div style={{
-            height: 1, backgroundColor: colors.border,
-            margin: '6px 8px', flexShrink: 0,
-          }} />
-        )}
-
         {/* Dynamic plugin items */}
         {sortedPlugins.map((plugin, idx) => {
           const active = activeView === `plugin:${plugin.id}`;
           const isDragging = dragIndex === idx;
-          const showLine = dragOverIndex === idx && dragIndex !== idx && dragIndex !== null;
+          const showDropIndicator = dragOverIndex === idx && dragIndex !== idx && dragIndex !== null;
           const Icon = ICON_NAME_MAP[plugin.icon] || PuzzlePiece;
           const label = lang === 'zh' ? plugin.name.zh : plugin.name.en;
           return (
-            <div key={plugin.id}>
-              {showLine && (
-                <div
-                  style={dropLineStyle}
-                  onDragOver={handleDragOver}
-                  onDragEnter={(e) => handleDragEnter(e, idx)}
-                  onDrop={(e) => handleDrop(e, idx)}
-                />
-              )}
-              <div
-                draggable={!collapsed}
-                onClick={() => onNavigate(`plugin:${plugin.id}`)}
-                onDragStart={(e) => handleDragStart(e, idx)}
-                onDragOver={handleDragOver}
-                onDragEnter={(e) => handleDragEnter(e, idx)}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, idx)}
-                onDragEnd={handleDragEnd}
-                style={{
-                  ...navBtnStyle(active),
-                  display: 'flex',
-                  alignItems: 'center',
-                  opacity: isDragging ? 0.4 : 1,
-                  cursor: collapsed ? 'pointer' : 'grab',
-                }}
-                title={collapsed ? label : undefined}>
-                {active && !collapsed && <div style={activeIndicator} />}
-                <Icon size={SIDEBAR_ICON_SIZE} weight={active ? 'fill' : 'bold'} />
-                {!collapsed && <span style={{ flex: 1 }}>{label}</span>}
-              </div>
+            <div
+              key={plugin.id}
+              draggable={!collapsed}
+              onClick={() => onNavigate(`plugin:${plugin.id}`)}
+              onDragStart={(e) => handleDragStart(e, idx)}
+              onDragOver={handleDragOver}
+              onDragEnter={(e) => handleDragEnter(e, idx)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, idx)}
+              onDragEnd={handleDragEnd}
+              style={{
+                ...navBtnStyle(active),
+                opacity: isDragging ? 0.4 : 1,
+                cursor: collapsed ? 'pointer' : 'grab',
+                borderTop: showDropIndicator ? `2px solid ${colors.accent}` : '2px solid transparent',
+              }}
+              title={collapsed ? label : undefined}>
+              {active && !collapsed && <div style={activeIndicator} />}
+              <Icon size={SIDEBAR_ICON_SIZE} weight={active ? 'fill' : 'bold'} />
+              {!collapsed && <span style={{ flex: 1 }}>{label}</span>}
             </div>
           );
         })}
 
         {/* End-of-list drop zone */}
-        {dragIndex !== null && (
-          <div
-            style={{ ...dropLineStyle, marginTop: 2, marginBottom: 2 }}
-            onDragOver={handleDragOver}
-            onDragEnter={() => setDragOverIndex(sortedPlugins.length)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragOverIndex(null);
-              if (dragIndex === null) return;
-              const arr = sortedPlugins.slice();
-              const moved = arr.splice(dragIndex, 1)[0];
-              arr.push(moved);
-              onReorder(arr.map(p => p.id));
-            }}
-          />
-        )}
+        <div
+          style={{
+            height: 4,
+            borderRadius: 1,
+            backgroundColor: dragOverIndex === sortedPlugins.length && dragIndex !== null ? colors.accent : 'transparent',
+            margin: '2px 8px',
+            flexShrink: 0,
+            transition: 'background-color 0.1s',
+          }}
+          onDragOver={handleDragOver}
+          onDragEnter={() => setDragOverIndex(sortedPlugins.length)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOverIndex(null);
+            if (dragIndex === null) return;
+            const arr = sortedPlugins.slice();
+            const moved = arr.splice(dragIndex, 1)[0];
+            arr.push(moved);
+            onReorder(arr.map(p => p.id));
+          }}
+        />
       </div>
 
       {/* About & Settings */}

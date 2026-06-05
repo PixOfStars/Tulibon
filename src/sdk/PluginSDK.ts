@@ -36,6 +36,7 @@ export interface PluginSDK {
   lib: {
     React: unknown;
     ReactDOM: unknown;
+    PluginDropdown: any;
   };
 }
 
@@ -121,7 +122,7 @@ function createAPI(): PluginAPI {
       const collection = collections.find((c: Collection) => c.id === collectionId);
       if (!collection) return [];
       return records.filter((r: AnalysisRecord) =>
-        r.userTags?.some((t: string) => t.includes(collectionId))
+        r.collectionIds?.includes(collectionId)
       );
     },
     async addToCollection(recordId: string, collectionId: string) {
@@ -219,6 +220,47 @@ function createPluginConfig(pluginId: string): PluginConfig {
 
 let currentPluginId: string | null = null;
 
+// Self-contained Dropdown for plugin use (no external deps)
+function createPluginDropdown(React: any) {
+  const { useState, useRef, useEffect, useCallback } = React;
+  return function PluginDropdown({ options, value, onChange, colors, placeholder }: {
+    options: { value: string; label: string }[];
+    value: string;
+    onChange: (v: string) => void;
+    colors: Record<string, string>;
+    placeholder?: string;
+  }) {
+    const [open, setOpen] = useState(false);
+    const triggerRef = useRef(null);
+    const panelRef = useRef(null);
+    const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
+    const recalc = useCallback(() => {
+      if (triggerRef.current) {
+        const r = triggerRef.current.getBoundingClientRect();
+        setPos({ top: r.bottom + 4, left: r.left, width: r.width });
+      }
+    }, []);
+    useEffect(() => { if (open) { recalc(); window.addEventListener('scroll', recalc, true); window.addEventListener('resize', recalc); } return () => { window.removeEventListener('scroll', recalc, true); window.removeEventListener('resize', recalc); }; }, [open, recalc]);
+    useEffect(() => { if (!open) return; const h = (e: MouseEvent) => { if (!triggerRef.current?.contains(e.target as Node) && !panelRef.current?.contains(e.target as Node)) setOpen(false); }; document.addEventListener('mousedown', h); return () => document.removeEventListener('mousedown', h); }, [open]);
+    const sel = options.find((o: { value: string }) => o.value === value);
+    return React.createElement(React.Fragment, null,
+      React.createElement('div', { ref: triggerRef, onClick: () => setOpen(!open), style: { padding: '8px 10px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', userSelect: 'none', border: '1px solid ' + colors.border, borderRadius: 6, backgroundColor: colors.grayBg, color: colors.text } },
+        React.createElement('span', { style: { color: sel ? colors.textHeader : 'rgba(128,128,128,0.6)', fontSize: 12 } }, sel?.label ?? placeholder ?? ''),
+        React.createElement('span', { style: { fontSize: 10, color: colors.text, opacity: 0.5 } }, open ? '▲' : '▼')
+      ),
+      open && React.createElement('div', { ref: panelRef, style: { position: 'fixed', top: pos.top, left: pos.left, width: pos.width, zIndex: 9999, backgroundColor: colors.bg, border: '1px solid ' + colors.border, borderRadius: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.24)', padding: 4, display: 'flex', flexDirection: 'column', maxHeight: 240, overflow: 'auto' } },
+        options.map((o: { value: string; label: string }) => React.createElement('button', {
+          key: o.value,
+          onClick: () => { onChange(o.value); setOpen(false); },
+          style: { display: 'flex', alignItems: 'center', padding: '8px 12px', borderRadius: 6, border: 'none', background: 'none', color: colors.textHeader, fontSize: 12, cursor: 'pointer', textAlign: 'left', width: '100%', backgroundColor: o.value === value ? colors.accentBg : 'transparent', fontWeight: o.value === value ? 700 : 500 },
+          onMouseEnter: (e: any) => { if (o.value !== value) e.currentTarget.style.backgroundColor = colors.accentBg; },
+          onMouseLeave: (e: any) => { if (o.value !== value) e.currentTarget.style.backgroundColor = 'transparent'; },
+        }, o.label))
+      )
+    );
+  };
+}
+
 export function injectPluginSDK(
   pluginId: string,
   manifest: PluginManifest,
@@ -242,6 +284,7 @@ export function injectPluginSDK(
     lib: {
       React: (window as unknown as Record<string, unknown>).React,
       ReactDOM: (window as unknown as Record<string, unknown>).ReactDOM,
+      PluginDropdown: createPluginDropdown((window as unknown as Record<string, unknown>).React),
     },
   };
 

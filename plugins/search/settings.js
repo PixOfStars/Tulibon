@@ -1,45 +1,15 @@
 (() => {
-  const SDK = window.__PLUGIN_SDK__;
-  if (!SDK) {
-    console.error('Search settings: SDK not available');
-    return;
+  const sdk = window.__PLUGIN_SDK__;
+  if (!sdk) {
+    console.error("Search settings: SDK not available");
+    throw new Error("SDK");
   }
-
-  const { config, lib } = SDK;
-  const t = SDK.config.lang === 'zh' ? {
-    placeholder: '搜索功能配置',
-    noSettings: '搜索插件当前没有额外的配置选项'
-  } : {
-    placeholder: 'Search plugin settings',
-    noSettings: 'Search plugin has no additional settings'
+  const lang = sdk.host.lang;
+  const colors = sdk.host.theme.colors;
+  const t = lang === "zh" ? "\u641C\u7D22\u63D2\u4EF6\u5F53\u524D\u6CA1\u6709\u989D\u5916\u7684\u914D\u7F6E\u9009\u9879" : "Search plugin has no additional settings";
+  sdk.ui.mount = (container) => {
+    container.innerHTML = '<div style="padding: 16px; color: ' + colors.text + '; opacity: 0.5; font-size: 12px; text-align: center;">' + t + "</div>";
   };
-
-  class SearchSettings {
-    constructor() {
-      this.container = null;
-    }
-
-    mount(container) {
-      this.container = container;
-      const html = `
-        <div style="padding: 16px; color: var(--color-text-secondary);">
-          <p>${t.noSettings}</p>
-        </div>
-      `;
-      container.innerHTML = html;
-    }
-
-    unmount() {
-      if (this.container) {
-        this.container.innerHTML = '';
-      }
-    }
-  }
-
-  const settings = new SearchSettings();
-
-  SDK.ui = {
-    mount: (container) => settings.mount(container),
-    unmount: () => settings.unmount(),
+  sdk.ui.unmount = () => {
   };
 })();

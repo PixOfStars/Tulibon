@@ -101,42 +101,7 @@ fn copy_dir(src: &Path, dest: &Path) -> Result<(), String> {
     Ok(())
 }
 
-pub fn ensure_bundled_plugins(app: &tauri::AppHandle) -> Result<(), String> {
-    let Some(bundled_root) = crate::app_paths::bundled_plugins_dir(app) else {
-        return Ok(());
-    };
-
-    let plugins_root = plugins_dir(app);
-    fs::create_dir_all(&plugins_root).map_err(|e| format!("创建插件目录失败: {}", e))?;
-
-    for entry in fs::read_dir(&bundled_root).map_err(|e| format!("读取内置插件目录失败: {}", e))?
-    {
-        let entry = entry.map_err(|e| format!("读取内置插件条目失败: {}", e))?;
-        let source_dir = entry.path();
-        if !source_dir.is_dir() {
-            continue;
-        }
-
-        let Some(source_manifest) = read_manifest(&source_dir) else {
-            continue;
-        };
-
-        let dest_dir = plugins_root.join(&source_manifest.id);
-        let should_copy = match read_manifest(&dest_dir) {
-            Some(existing) => existing.version != source_manifest.version,
-            None => true,
-        };
-
-        if should_copy {
-            if dest_dir.exists() {
-                fs::remove_dir_all(&dest_dir).map_err(|e| format!("更新内置插件失败: {}", e))?;
-            }
-            copy_dir(&source_dir, &dest_dir)?;
-        }
-    }
-
-    Ok(())
-}
+// ensure_bundled_plugins removed: plugins are now user-installed from registry.
 
 fn get_enabled_state(app: &tauri::AppHandle, plugin_id: &str) -> bool {
     let config_dir = app_data_dir(app).join("data");

@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "release": "node scripts/release.mjs",
-    "tauri:build": "dotenv -e .env -- npx tauri build"
+    "tauri:build": "dotenv -e .env -- npx tauri build",
+    "build:plugins": "node scripts/build-plugins.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
@@ -30,6 +31,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.0",
     "dotenv-cli": "^5.1.0",
+    "esbuild": "^0.28.0",
     "sharp": "^0.34.5",
     "typescript": "~5.9.3",
     "vite": "^5.4.0"

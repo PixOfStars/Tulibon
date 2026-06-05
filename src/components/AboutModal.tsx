@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { X } from '@phosphor-icons/react';
 import type { AppTheme } from '../theme';
+import { ABOUT_MODAL_WIDTH } from '../styles';
 import { useToast } from './Toast';
 import { tauriInvoke, createIpcChannel } from '../utils/tauri';
 import AboutTab from './settings/AboutTab';
@@ -81,8 +82,9 @@ const AboutModal = ({ theme, lang, onClose }: AboutModalProps) => {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: 360,
-          maxHeight: '88vh',
+          width: ABOUT_MODAL_WIDTH,
+          height: '88vh',
+          maxHeight: 620,
           display: 'flex',
           flexDirection: 'column',
           backgroundColor: colors.bg,
