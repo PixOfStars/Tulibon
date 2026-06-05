@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { RocketLaunch, ChatCircleText, DownloadSimple } from '@phosphor-icons/react';
 import { Divider } from './SettingsField';
 import QrModal from './QrModal';
-import type { TabProps } from './TabProps';
 import { tauriInvoke } from '../../utils/tauri';
 
-interface AboutTabProps extends TabProps {
+interface AboutTabProps {
+  colors: Record<string, string>;
+  t: Record<string, string>;
   updateState: 'idle' | 'checking' | 'available' | 'uptodate' | 'installing';
   updateInfo: { version: string; body: string } | null;
   onCheckUpdate: () => void;

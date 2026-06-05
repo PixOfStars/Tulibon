@@ -98,5 +98,5 @@ fn main() {
         }
     }
 
-    ai_vision::run()
+    Tulibon::run()
 }
