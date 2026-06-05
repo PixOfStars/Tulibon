@@ -13,7 +13,7 @@ interface AboutTabProps {
   onInstallUpdate: () => void;
 }
 
-const VERSION = '0.30.6';
+const VERSION = '0.30.7';
 
 const AboutTab = ({ colors, t, updateState, updateInfo, onCheckUpdate, onInstallUpdate }: AboutTabProps) => {
   const [qrModalOpen, setQrModalOpen] = useState(false);
