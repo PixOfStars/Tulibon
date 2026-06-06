@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { clipboardToDataUrl } from '../../utils/helpers';
 import type { AnalysisRecord, ImageSource } from '../../types';
-import { getT } from "../../utils/i18n";
+import zh from '../../locales/zh.json';
 import en from '../../locales/en.json';
 
 interface UseGlobalShortcutsParams {

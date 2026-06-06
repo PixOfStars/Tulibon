@@ -6,7 +6,6 @@ import { useToast } from './Toast';
 import { tauriInvoke, createIpcChannel } from '../utils/tauri';
 import AboutTab from './settings/AboutTab';
 import { getT } from '../utils/i18n';
-import en from '../locales/en.json';
 
 interface AboutModalProps {
   theme: AppTheme;

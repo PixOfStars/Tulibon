@@ -22,6 +22,7 @@ import ShortcutsTab from "./settings/ShortcutsTab";
 import ModeStyleTab from "./settings/ModeStyleTab";
 import OcrTab from "./settings/OcrTab";
 import { getT } from "../utils/i18n";
+import type zh from "../locales/zh.json";
 
 interface SettingsModalProps {
 	prefs: ReturnType<typeof import("../hooks/usePreferences").usePreferences>;
@@ -49,7 +50,7 @@ const tabItems: { key: Tab; icon: typeof Key; i18nKey: keyof typeof zh }[] = [
 
 const SettingsModal = ({ prefs, theme, onClose }: SettingsModalProps) => {
 	const { config, saveConfig: prefsSaveConfig } = prefs;
-	const t = getT(lang);
+	const t = getT(config.prefLang);
 	const colors = theme.colors;
 	const toast = useToast();
 	const toastTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);

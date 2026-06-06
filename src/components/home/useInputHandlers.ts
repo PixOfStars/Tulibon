@@ -1,6 +1,6 @@
 import { generateId, base64FromFile, base64FromUrl, clipboardToDataUrl } from '../../utils/helpers';
 import type { BatchItem } from '../../types';
-import { getT } from "../../utils/i18n";
+import type zh from '../../locales/zh.json';
 
 interface UseInputHandlersParams {
   config: ReturnType<typeof import('../../hooks/usePreferences').usePreferences>['config'];

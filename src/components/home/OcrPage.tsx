@@ -10,7 +10,7 @@ import { useToast } from "../Toast";
 import { useCroppedImage } from "../../hooks/useCroppedImage";
 import OcrResultView from "../result/OcrResultView";
 import ImageDropZone from "./ImageDropZone";
-import { getT } from "../utils/i18n";
+import { getT } from "../../utils/i18n";
 
 interface OcrPageProps {
 	theme: AppTheme;

@@ -15,7 +15,7 @@ interface ImageDropZoneProps {
 const URL_RE = /^https?:\/\/\S+\.(png|jpe?g|webp|gif|bmp|svg)(\?\S*)?$/i;
 
 const ImageDropZone = ({ config, colors, isAnalyzing, onClipboard, onFileSelect, onUrlPaste }: ImageDropZoneProps) => {
-  const t = getT(lang);
+  const t = getT(config.prefLang as 'zh' | 'en');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [urlInput, setUrlInput] = useState('');
 
