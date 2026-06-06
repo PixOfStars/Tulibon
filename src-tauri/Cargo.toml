@@ -1,6 +1,6 @@
 [package]
 name = "Tulibon"
-version = "0.30.8"
+version = "0.30.9"
 edition = "2021"
 
 [dependencies]
