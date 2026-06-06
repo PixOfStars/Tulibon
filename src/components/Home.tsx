@@ -28,8 +28,7 @@ import { useInputHandlers } from "./home/useInputHandlers";
 import { useCroppedImage } from "../hooks/useCroppedImage";
 import { useTagManagement } from "./home/useTagManagement";
 import { useUndoManager } from "./home/useUndoManager";
-import zh from "../locales/zh.json";
-import en from "../locales/en.json";
+import { getT } from "../utils/i18n";
 
 interface HomeProps {
 	prefs: ReturnType<typeof import("../hooks/usePreferences").usePreferences>;
@@ -72,7 +71,7 @@ const Home = ({
 	onSearch,
 }: HomeProps) => {
 	const { config, activeProviderConfig } = prefs;
-	const t = config.prefLang === "zh" ? zh : en;
+	const t = getT(config.prefLang);
 	const toast = useToast();
 	const colors = theme.colors;
 
@@ -131,7 +130,7 @@ const Home = ({
 		}
 	};
 
-	const { handleClipboard, handleUrlPaste, handleFileSelect, handleDropFiles } =
+	const { handleClipboard, handleUrlPaste, handleFileSelect } =
 		useInputHandlers({
 			config,
 			analysisMode,
@@ -170,7 +169,7 @@ const Home = ({
 			const rec = await runAnalysis(
 				batchItems[i].imageDataUrl,
 				batchItems[i].analysisMode || analysisMode,
-				"drag",
+				"file",
 			);
 			if (rec) {
 				completed.push(rec);
@@ -303,7 +302,6 @@ const Home = ({
 						isAnalyzing={isAnalyzing}
 						onClipboard={handleClipboard}
 						onFileSelect={handleFileSelect}
-						onDropFiles={handleDropFiles}
 						onUrlPaste={handleUrlPaste}
 					/>
 					{crop.cropComponent}
@@ -355,7 +353,7 @@ const Home = ({
 							type="text"
 							value={searchQuery}
 							onChange={(e) => onSearch?.(e.target.value)}
-							placeholder={t.searchPlaceholder}
+							placeholder="Search history..."
 							style={{
 								flex: 1,
 								padding: "12px 0",
@@ -603,10 +601,7 @@ const Home = ({
 							searchQuery.trim() &&
 							renderRecordList(
 								searchRecords(records, tags, searchQuery),
-								t.searchResults.replace(
-									"{n}",
-									String(searchRecords(records, tags, searchQuery).length),
-								),
+								"Results: " + records.length,
 							)}
 						{isCollectionView && displayHistory.length > 0 && (
 							<div style={{ paddingTop: 8 }}>

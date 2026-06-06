@@ -2,8 +2,7 @@ import { useRef } from 'react';
 import { Scissors, X } from '@phosphor-icons/react';
 import type { CropRect } from '../../types';
 import { smallBtnStyle } from './HomeHelpers';
-import zh from '../../locales/zh.json';
-import en from '../../locales/en.json';
+import { getT } from '../../utils/i18n';
 
 interface CropPanelProps {
   cropImage: string;
@@ -22,7 +21,7 @@ const CropPanel = ({
   cropImage, cropRect, themeColors: colors, lang,
   onMouseDown, onMouseMove, onMouseUp, onCropReset, onCropConfirm, onCancel,
 }: CropPanelProps) => {
-  const t = lang === 'zh' ? zh : en;
+  const t = getT(lang);
   const cropRef = useRef<HTMLDivElement>(null);
   const hasValidCrop = cropRect && cropRect.width > 5 && cropRect.height > 5;
   const imgNatural = cropRef.current?.querySelector('img');

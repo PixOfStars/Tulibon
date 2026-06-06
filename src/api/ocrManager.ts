@@ -113,19 +113,25 @@ export async function checkEngine(
 
 // ── Recognition ──
 
-let lastRecogTime = 0;
-const DEBOUNCE_MS = 1000;
+/**
+ * OCR recognizer with per-instance debounce state.
+ * Use the default exported instance for most cases, or create
+ * a new OcrRecognizer for independent debounce contexts.
+ */
+export class OcrRecognizer {
+	private lastRecogTime = 0;
+	private readonly DEBOUNCE_MS = 1000;
 
-/** 执行 OCR 识别，返回识别文本 */
-export async function recognize(options: OcrRecognizeOptions): Promise<string> {
-	const { imageDataUrl, engine, engineDownloaded, lang, onProgress } = options;
+	/** 执行 OCR 识别，返回识别文本 */
+	async recognize(options: OcrRecognizeOptions): Promise<string> {
+		const { imageDataUrl, engine, engineDownloaded, lang, onProgress } = options;
 
-	// Debounce: prevent rapid clicks
-	const now = Date.now();
-	if (now - lastRecogTime < DEBOUNCE_MS) {
-		throw new Error("Please wait before retrying");
-	}
-	lastRecogTime = now;
+		// Debounce: prevent rapid clicks
+		const now = Date.now();
+		if (now - this.lastRecogTime < this.DEBOUNCE_MS) {
+			throw new Error("Please wait before retrying");
+		}
+		this.lastRecogTime = now;
 
 	onProgress?.("initializing");
 
@@ -166,13 +172,21 @@ export async function recognize(options: OcrRecognizeOptions): Promise<string> {
 
 		default:
 			throw new Error(`未知引擎: ${engine}`);
+		}
+	}
+
+	/** 重置防抖 */
+	resetDebounce(): void {
+		this.lastRecogTime = 0;
 	}
 }
 
-/** 重置防抖 */
-export function resetDebounce(): void {
-	lastRecogTime = 0;
-}
+// ── Default instance for backward compatibility ──
+
+const defaultRecognizer = new OcrRecognizer();
+
+export const recognize = defaultRecognizer.recognize.bind(defaultRecognizer);
+export const resetDebounce = defaultRecognizer.resetDebounce.bind(defaultRecognizer);
 
 /** 引擎降级策略：按优先级返回可用的引擎 */
 export function getFallbackEngine(

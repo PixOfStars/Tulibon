@@ -1,8 +1,7 @@
 import { useRef, useState } from 'react';
 import { ClipboardText, ImageSquare, Link } from '@phosphor-icons/react';
 import { iconBtnStyle } from './HomeHelpers';
-import zh from '../../locales/zh.json';
-import en from '../../locales/en.json';
+import { getT } from '../../utils/i18n';
 
 interface ImageDropZoneProps {
   config: ReturnType<typeof import('../../hooks/usePreferences').usePreferences>['config'];
@@ -10,37 +9,15 @@ interface ImageDropZoneProps {
   isAnalyzing?: boolean;
   onClipboard: () => void;
   onFileSelect: (files: FileList) => void;
-  onDropFiles: (files: File[]) => void;
   onUrlPaste: (url: string) => void;
 }
 
 const URL_RE = /^https?:\/\/\S+\.(png|jpe?g|webp|gif|bmp|svg)(\?\S*)?$/i;
 
-const ImageDropZone = ({ config, colors, isAnalyzing, onClipboard, onFileSelect, onDropFiles, onUrlPaste }: ImageDropZoneProps) => {
-  const t = config.prefLang === 'zh' ? zh : en;
+const ImageDropZone = ({ config, colors, isAnalyzing, onClipboard, onFileSelect, onUrlPaste }: ImageDropZoneProps) => {
+  const t = getT(lang);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dropZoneRef = useRef<HTMLDivElement>(null);
   const [urlInput, setUrlInput] = useState('');
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (dropZoneRef.current) {
-      dropZoneRef.current.style.borderColor = colors.accent;
-      dropZoneRef.current.style.backgroundColor = colors.accentBg;
-    }
-  };
-  const handleDragLeave = () => {
-    if (dropZoneRef.current) {
-      dropZoneRef.current.style.borderColor = colors.border;
-      dropZoneRef.current.style.backgroundColor = 'transparent';
-    }
-  };
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    handleDragLeave();
-    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-    if (files.length > 0) onDropFiles(files);
-  };
 
   const handlePaste = (e: React.ClipboardEvent) => {
     if (!config.inputMethods.urlPaste) return;
@@ -52,13 +29,10 @@ const ImageDropZone = ({ config, colors, isAnalyzing, onClipboard, onFileSelect,
   };
 
   const hasButtons = config.inputMethods.clipboard || config.inputMethods.filePicker;
-  const showDragHint = config.inputMethods.dragDrop && !hasButtons;
 
   return (
     <div>
       <div
-        ref={dropZoneRef}
-        {...(config.inputMethods.dragDrop ? { onDrop: handleDrop, onDragOver: handleDragOver, onDragLeave: handleDragLeave } : {})}
         onPaste={handlePaste}
         style={{
           border: `2px dashed ${colors.border}`, borderRadius: 14, padding: hasButtons ? '20px' : '24px 20px',
@@ -76,9 +50,6 @@ const ImageDropZone = ({ config, colors, isAnalyzing, onClipboard, onFileSelect,
             <ImageSquare size={18} weight="bold" />
             <span style={{ fontSize: 11 }}>{t.dragHere}</span>
           </button>
-        )}
-        {showDragHint && (
-          <span style={{ fontSize: 12, color: colors.text, opacity: 0.4 }}>{t.hintDragDrop || t.dragHint}</span>
         )}
       </div>
 

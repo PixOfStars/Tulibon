@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import type { AnalysisRecord, AnalysisResult, ImageSource, Tag, CropRect, ProviderConfig, ModeProfile, StylePreset } from '../../types';
 import { analyzeImage } from '../../api';
 import { generateId, saveImageToDisk } from '../../utils/helpers';
@@ -17,6 +17,12 @@ interface UseAnalysisProps {
 }
 
 export function useAnalysis({ activeProviderConfig, quickSave, needApiKey, tags, onTagsChange, setStatus, setErrorMsg, modeProfiles, stylePresets }: UseAnalysisProps) {
+  // Use refs for frequently-changing values to avoid invalidating useCallback on every tag change
+  const tagsRef = useRef(tags);
+  tagsRef.current = tags;
+  const onTagsChangeRef = useRef(onTagsChange);
+  onTagsChangeRef.current = onTagsChange;
+
   const runAnalysis = useCallback(async (
     imageDataUrl: string, profileId: string, source: ImageSource, crop?: CropRect,
   ): Promise<AnalysisRecord | null> => {
@@ -33,10 +39,11 @@ export function useAnalysis({ activeProviderConfig, quickSave, needApiKey, tags,
       const totalTags = Math.max(zhTags.length, enTags.length);
       const newTags: Tag[] = [];
       const systemTagIds: string[] = [];
+      const currentTags = tagsRef.current;
       for (let i = 0; i < totalTags; i++) {
         const zhName = zhTags[i] || enTags[i] || '';
         const enName = enTags[i] || zhTags[i] || '';
-        const existing = tags.find(tg => tg.name.zh === zhName);
+        const existing = currentTags.find(tg => tg.name.zh === zhName);
         if (existing) {
           systemTagIds.push(existing.id);
         } else {
@@ -45,14 +52,17 @@ export function useAnalysis({ activeProviderConfig, quickSave, needApiKey, tags,
           systemTagIds.push(tagId);
         }
       }
-      if (newTags.length > 0) onTagsChange([...tags, ...newTags]);
+      if (newTags.length > 0) onTagsChangeRef.current([...currentTags, ...newTags]);
       const recordId = generateId();
       const imagePath = await saveImageToDisk(recordId, finalImage);
+      // Derive analysisMode from the modeProfile's modeType (e.g., 'design' or 'ocr')
+      const analysisMode: AnalysisRecord['analysisMode'] =
+        (modeProfile?.modeType as AnalysisRecord['analysisMode']) || 'design';
       const record: AnalysisRecord = {
         id: recordId,
         imagePath,
         source,
-        analysisMode: 'design',
+        analysisMode,
         summary: result.summary,
         systemTags: systemTagIds,
         userTags: [],
@@ -62,7 +72,7 @@ export function useAnalysis({ activeProviderConfig, quickSave, needApiKey, tags,
       };
       return record;
     } catch (e) { setErrorMsg(e instanceof Error ? e.message : String(e)); setStatus('error'); return null; }
-  }, [activeProviderConfig, quickSave, needApiKey, tags, onTagsChange, setStatus, setErrorMsg, modeProfiles, stylePresets]);
+  }, [activeProviderConfig, quickSave, needApiKey, setStatus, setErrorMsg, modeProfiles, stylePresets]);
 
   return runAnalysis;
 }

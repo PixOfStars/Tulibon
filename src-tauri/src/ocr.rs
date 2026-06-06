@@ -81,6 +81,7 @@ pub async fn recognize(image_bytes: &[u8], lang: &str) -> Result<String, String>
         .map_err(|e| format!("获取 SoftwareBitmap 失败: {}", e))?;
 
     // 4. 创建 OcrEngine（优先指定语言，失败则用系统用户配置语言）
+    let mut fallback_used = false;
     let engine = if !lang.is_empty() {
         let hstr = &windows::core::HSTRING::from(lang);
         let language = Language::CreateLanguage(hstr)
@@ -90,6 +91,7 @@ pub async fn recognize(image_bytes: &[u8], lang: &str) -> Result<String, String>
         if lang_supported {
             OcrEngine::TryCreateFromLanguage(&language)
         } else {
+            fallback_used = true;
             OcrEngine::TryCreateFromUserProfileLanguages()
         }
     } else {
@@ -106,5 +108,12 @@ pub async fn recognize(image_bytes: &[u8], lang: &str) -> Result<String, String>
     let text = result.Text()
         .map_err(|e| format!("读取识别结果失败: {}", e))?;
 
-    Ok(text.to_string())
+    if fallback_used {
+        Ok(format!(
+            "[警告] 语言包 '{}' 不可用，已回退为系统默认语言。\n\n{}",
+            lang, text
+        ))
+    } else {
+        Ok(text.to_string())
+    }
 }

@@ -46,11 +46,6 @@ impl MirrorCache {
 
 static MIRROR_CACHE: std::sync::Mutex<Option<MirrorCache>> = std::sync::Mutex::new(None);
 
-/// 只返回原始 GitHub URL（已移除不可靠的第三方镜像）
-pub fn build_download_urls(release_url: &str) -> Vec<String> {
-    vec![release_url.to_string()]
-}
-
 /// HEAD 预检：并行测试各镜像的可用性和延迟
 pub async fn precheck_mirrors(urls: &[String]) -> Vec<(String, u64)> {
     let client = reqwest::Client::builder()

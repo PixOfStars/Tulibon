@@ -34,8 +34,8 @@ export function getTheme(mode: ThemeMode, accentColor = '#00C896') {
       warning: '#F59E0B',
     },
     fonts: {
-      sans: `'Sarasa Gothic SC', '更纱黑体', sans-serif`,
-      mono: `'Sarasa Mono SC', '等距更纱黑体', monospace`,
+      sans: `-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif`,
+      mono: `"Cascadia Code", "Fira Code", "JetBrains Mono", "SF Mono", "Menlo", "Consolas", monospace`,
     },
     radius: {
       small: '8px',

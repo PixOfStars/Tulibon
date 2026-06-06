@@ -1,7 +1,6 @@
 import { Trash, X } from '@phosphor-icons/react';
 import type { BatchItem } from '../../types';
-import zh from '../../locales/zh.json';
-import en from '../../locales/en.json';
+import { getT } from '../../utils/i18n';
 
 interface BatchPanelProps {
   batchItems: BatchItem[];
@@ -14,7 +13,7 @@ interface BatchPanelProps {
 }
 
 const BatchPanel = ({ batchItems, batchRunning, themeColors: colors, lang, onStart, onClear, onRemove }: BatchPanelProps) => {
-  const t = lang === 'zh' ? zh : en;
+  const t = getT(lang);
 
   return (
     <div style={{ paddingTop: 12 }}>

@@ -25,7 +25,7 @@ const AboutTab = ({ colors, t, updateState, updateInfo, onCheckUpdate, onInstall
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ textAlign: 'center', padding: '12px 0' }}>
-        <img src="/icon.png" alt={t.appName} style={{ width: 48, height: 48, marginBottom: 8 }} />
+        <img src="/icon.png" alt={t.appName} style={{ width: 48, height: 48, marginBottom: 8, borderRadius: 12 }} />
         <div style={{ fontSize: 16, fontWeight: 700, color: colors.textHeader }}>{t.appName}</div>
         <div style={{ fontSize: 12, color: colors.text, marginTop: 4 }}>{t.aboutVersion} {VERSION}</div>
       </div>

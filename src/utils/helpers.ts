@@ -38,8 +38,17 @@ export function migrateLegacyRecord(old: AnalysisRecord_Legacy, existingTagMap: 
   }));
 
   for (const tagName of allTags) {
-    const tagId = `tag_${tagName.zh.toLowerCase().replace(/\s+/g, '_')}`;
-    if (!existingTagMap.has(tagId)) {
+    // Prefer an existing tag with the same Chinese name; otherwise generate a
+    // unique ID instead of deriving from Chinese text (which collides easily).
+    let tagId = '';
+    for (const [existingId, existingTag] of existingTagMap) {
+      if (existingTag.name.zh === tagName.zh) {
+        tagId = existingId;
+        break;
+      }
+    }
+    if (!tagId) {
+      tagId = `tag_${generateId()}`;
       existingTagMap.set(tagId, {
         id: tagId,
         name: { zh: tagName.zh, en: tagName.en },
@@ -213,7 +222,7 @@ export function formatDate(ts: number, lang: 'zh' | 'en'): string {
 }
 
 export async function clipboardToDataUrl(): Promise<string> {
-  const base64 = await (window as any).__TAURI_INTERNALS__.invoke('read_clipboard_image');
+  const base64 = await tauriInvoke('read_clipboard_image');
   if (!base64) throw new Error('No image in clipboard');
   return `data:image/png;base64,${base64}`;
 }

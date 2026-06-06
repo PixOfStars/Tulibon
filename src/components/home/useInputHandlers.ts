@@ -1,8 +1,6 @@
-import { useRef, useEffect } from 'react';
 import { generateId, base64FromFile, base64FromUrl, clipboardToDataUrl } from '../../utils/helpers';
-import { tauriListen } from '../../utils/tauri';
 import type { BatchItem } from '../../types';
-import zh from '../../locales/zh.json';
+import { getT } from "../../utils/i18n";
 
 interface UseInputHandlersParams {
   config: ReturnType<typeof import('../../hooks/usePreferences').usePreferences>['config'];
@@ -15,21 +13,9 @@ interface UseInputHandlersParams {
 }
 
 export function useInputHandlers({
-  config, analysisMode, t, toast,
+  analysisMode, t, toast,
   setCropImage, setStatus, setBatchItems,
 }: UseInputHandlersParams) {
-  const dropRef = useRef<{ handleDropDataUrls?: (dataUrls: string[]) => void }>({});
-
-  useEffect(() => {
-    let unlisten: (() => void) | undefined;
-    let cancelled = false;
-    tauriListen('file-drop', (dataUrls: string[]) => {
-      if (cancelled) return;
-      dropRef.current?.handleDropDataUrls?.(dataUrls);
-    }).then(fn => { if (!cancelled) unlisten = fn; })
-      .catch(e => { console.error('file-drop listener failed:', e); });
-    return () => { cancelled = true; unlisten?.(); };
-  }, []);
 
   const handleClipboard = async () => {
     try { const dataUrl = await clipboardToDataUrl(); setCropImage(dataUrl); setStatus('idle'); toast.show(t.clipboardLoaded, 'success'); }
@@ -62,35 +48,5 @@ export function useInputHandlers({
     }
   };
 
-  const handleDropDataUrls = (dataUrls: string[]) => {
-    if (!config.inputMethods.dragDrop) return;
-    if (dataUrls.length === 1) {
-      setCropImage(dataUrls[0]);
-      setStatus('idle');
-      toast.show(t.imageLoaded, 'success');
-    } else {
-      const items: BatchItem[] = dataUrls.map(dataUrl => ({
-        id: generateId(), imageDataUrl: dataUrl, analysisMode, status: 'queued' as const,
-      }));
-      setBatchItems(prev => [...prev, ...items]);
-      toast.show(t.imagesAddedToBatch.replace('{n}', String(items.length)), 'info');
-    }
-  };
-
-  const handleDropFiles = async (files: File[]) => {
-    if (files.length === 1) {
-      try { const dataUrl = await base64FromFile(files[0]); setCropImage(dataUrl); setStatus('idle'); toast.show(t.imageLoaded, 'success'); }
-      catch { toast.show(t.fileReadFailed, 'error'); }
-    } else {
-      const items: BatchItem[] = [];
-      for (const file of files) {
-        try { items.push({ id: generateId(), imageDataUrl: await base64FromFile(file), analysisMode, status: 'queued' }); } catch { /* */ }
-      }
-      if (items.length > 0) { setBatchItems(prev => [...prev, ...items]); toast.show(t.imagesAddedToBatch.replace('{n}', String(items.length)), 'info'); }
-    }
-  };
-
-  dropRef.current = { handleDropDataUrls };
-
-  return { handleClipboard, handleUrlPaste, handleFileSelect, handleDropDataUrls, handleDropFiles };
+  return { handleClipboard, handleUrlPaste, handleFileSelect };
 }

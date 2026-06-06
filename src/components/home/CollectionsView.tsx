@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, X, Check } from '@phosphor-icons/react';
 import type { Collection, AnalysisRecord } from '../../types';
 import { CollectionContextMenu, getCollIcon } from './CollectionContextMenu';
-import zh from '../../locales/zh.json';
-import en from '../../locales/en.json';
+import { getT } from '../../utils/i18n';
 
 interface CollectionsViewProps {
   collections: Collection[];
@@ -20,7 +19,7 @@ const CollectionsView = ({
   collections, records, lang, colors,
   onCreateCollection, onUpdateCollection, onDeleteCollection, onNavigate,
 }: CollectionsViewProps) => {
-  const t = lang === 'zh' ? zh : en;
+  const t = getT(lang);
 
   const [ctxMenu, setCtxMenu] = useState<{ collectionId: string; x: number; y: number } | null>(null);
   const [ctxSubmenu, setCtxSubmenu] = useState<'icon' | 'color' | null>(null);

@@ -70,7 +70,7 @@ export const DEFAULT_COLLECTIONS: Omit<Collection, 'createdAt' | 'updatedAt'>[] 
 // 分析记录（知识库核心）+ 分析结果
 // ===================================================================
 
-export type ImageSource = 'clipboard' | 'drag' | 'url';
+export type ImageSource = 'clipboard' | 'file' | 'url';
 
 export interface AnalysisRecord {
   id: string;

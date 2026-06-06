@@ -1,14 +1,13 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import './App.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import ErrorBoundary from "./components/ErrorBoundary";
+import "./App.css";
 
-// Expose React globals for plugin scripts loaded via <script> tags
-(window as any).React = React;
-(window as any).ReactDOM = ReactDOM;
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+ReactDOM.createRoot(document.getElementById("root")!).render(
+	<React.StrictMode>
+		<ErrorBoundary>
+			<App />
+		</ErrorBoundary>
+	</React.StrictMode>,
 );

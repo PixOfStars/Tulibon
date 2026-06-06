@@ -20,20 +20,23 @@ export function useHomeActions({
   records, collections, currentResult, config, t, onRecordsChange, setCurrentResult, setStatus, toast,
 }: UseHomeActionsProps) {
   const toggleCollection = useCallback(async (recordId: string, collectionId: string) => {
-    const updated = records.map(r => {
-      if (r.id !== recordId) return r;
-      const has = r.collectionIds.includes(collectionId);
-      return { ...r, updatedAt: Date.now(), collectionIds: has ? r.collectionIds.filter(cid => cid !== collectionId) : [...r.collectionIds, collectionId] };
-    });
+    // Single-pass: find the target record once and compute the new state
+    const targetRecord = records.find(r => r.id === recordId);
+    if (!targetRecord) return;
+    const wasIn = targetRecord.collectionIds.includes(collectionId);
+    const newCollectionIds = wasIn
+      ? targetRecord.collectionIds.filter(cid => cid !== collectionId)
+      : [...targetRecord.collectionIds, collectionId];
+
+    const updated = records.map(r =>
+      r.id === recordId ? { ...r, updatedAt: Date.now(), collectionIds: newCollectionIds } : r,
+    );
     onRecordsChange(updated);
     if (currentResult?.id === recordId) {
-      const has = currentResult.collectionIds.includes(collectionId);
-      setCurrentResult({ ...currentResult, updatedAt: Date.now(), collectionIds: has ? currentResult.collectionIds.filter(cid => cid !== collectionId) : [...currentResult.collectionIds, collectionId] });
+      setCurrentResult({ ...currentResult, updatedAt: Date.now(), collectionIds: newCollectionIds });
     }
     const coll = collections.find(c => c.id === collectionId);
     const collName = coll ? (config.prefLang === 'zh' ? coll.name.zh : coll.name.en) : collectionId;
-    const record = records.find(r => r.id === recordId);
-    const wasIn = record?.collectionIds.includes(collectionId);
     toast.show(
       wasIn
         ? t.removedFromCollection.replace('{name}', collName)
@@ -44,15 +47,12 @@ export function useHomeActions({
 
   const deleteRecord = useCallback(async (id: string, setUndoData: (d: { prevHistory: AnalysisRecord[]; message: string } | null) => void) => {
     const prev = [...records];
-    const target = records.find(r => r.id === id);
     setUndoData({ prevHistory: prev, message: t.undoDelete });
     onRecordsChange(records.filter(r => r.id !== id));
     if (currentResult?.id === id) setCurrentResult(null);
     setStatus('idle');
-    // Delete image from disk
-    if (target?.imagePath && !target.imagePath.startsWith('data:')) {
-      tauriInvoke('delete_image', { path: target.imagePath }).catch(() => {});
-    }
+    // Backend: delete record from history + clean up associated image in one atomic operation
+    tauriInvoke('delete_record_by_id', { recordId: id }).catch(() => {});
   }, [records, currentResult, t.undoDelete, onRecordsChange, setCurrentResult, setStatus]);
 
   const exportRecord = useCallback(async (record: AnalysisRecord, format: 'txt' | 'md') => {
@@ -69,7 +69,14 @@ export function useHomeActions({
       const ext = format === 'txt' ? 'txt' : 'md';
       const filePath = await tauriInvoke('plugin:dialog|save', { options: { defaultPath: `tulibon-analysis.${ext}` } });
       if (filePath && typeof filePath === 'string') {
+        // __TAURI_INTERNALS__ invoke is used here because the public
+        // tauriInvoke wrapper cannot pass raw Uint8Array arguments.
+        // This is a known limitation — the fs plugin requires binary
+        // data as a raw IPC argument rather than a JSON-serializable object.
         const internals = (window as any).__TAURI_INTERNALS__;
+        if (!internals?.invoke) {
+          throw new Error('Tauri IPC not available');
+        }
         const encoder = new TextEncoder();
         await internals.invoke(
           'plugin:fs|write_text_file',

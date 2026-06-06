@@ -21,44 +21,4 @@ pub fn legacy_app_data_dir(app: &tauri::AppHandle) -> Option<PathBuf> {
     app.path().app_data_dir().ok()
 }
 
-pub fn resource_dir(app: &tauri::AppHandle) -> Option<PathBuf> {
-    app.path().resource_dir().ok()
-}
 
-pub fn bundled_plugins_dir(app: &tauri::AppHandle) -> Option<PathBuf> {
-    let resource_plugins = resource_dir(app).map(|p| p.join("plugins"));
-    if let Some(path) = resource_plugins.filter(|p| p.exists()) {
-        return Some(path);
-    }
-
-    #[cfg(debug_assertions)]
-    {
-        let source_plugins = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .parent()
-            .map(|p| p.join("plugins"));
-        if let Some(path) = source_plugins.filter(|p| p.exists()) {
-            return Some(path);
-        }
-    }
-
-    None
-}
-
-pub fn bundled_registry_path(app: &tauri::AppHandle) -> Option<PathBuf> {
-    let resource_registry = resource_dir(app).map(|p| p.join("plugins.json"));
-    if let Some(path) = resource_registry.filter(|p| p.exists()) {
-        return Some(path);
-    }
-
-    #[cfg(debug_assertions)]
-    {
-        let source_registry = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .parent()
-            .map(|p| p.join("plugins.json"));
-        if let Some(path) = source_registry.filter(|p| p.exists()) {
-            return Some(path);
-        }
-    }
-
-    None
-}

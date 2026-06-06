@@ -1,134 +1,21 @@
 mod app_paths;
+mod config_crypto;
 mod download;
 mod ocr;
-mod plugin_manager;
 
 use arboard::Clipboard;
 use base64::Engine;
+use config_crypto::{decrypt_config_keys, encrypt_config_keys};
 use image::{ImageBuffer, ImageFormat, Rgba};
-use plugin_manager::{
-    disable_plugin, enable_plugin, fetch_registry, get_cached_registry,
-    get_plugin, get_plugin_config, get_plugin_state, install_plugin, list_plugins,
-    read_plugin_file, set_plugin_config, uninstall_plugin,
-};
+
 use std::fs;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::DragDropEvent;
 use tauri::{Emitter, Manager};
-
-// ── DPAPI helpers ──
-
-use windows::Win32::Security::Cryptography::{
-    CryptProtectData, CryptUnprotectData, CRYPT_INTEGER_BLOB as CRYPTOAPI_BLOB,
-};
-
-const CRYPTPROTECT_UI_FORBIDDEN: u32 = 0x1;
-
-fn dpapi_encrypt(plaintext: &[u8]) -> Result<Vec<u8>, String> {
-    if plaintext.is_empty() {
-        return Ok(Vec::new());
-    }
-    unsafe {
-        let input = CRYPTOAPI_BLOB {
-            cbData: plaintext.len() as u32,
-            pbData: plaintext.as_ptr() as *mut u8,
-        };
-        let mut output = std::mem::zeroed::<CRYPTOAPI_BLOB>();
-        CryptProtectData(
-            &input,
-            windows::core::PCWSTR::null(),
-            None,
-            None,
-            None,
-            CRYPTPROTECT_UI_FORBIDDEN,
-            &mut output,
-        )
-        .map_err(|e| format!("CryptProtectData failed: {}", e))?;
-        let bytes = std::slice::from_raw_parts(output.pbData, output.cbData as usize).to_vec();
-        let _ = windows::Win32::Foundation::LocalFree(Some(windows::Win32::Foundation::HLOCAL(
-            output.pbData as *mut std::ffi::c_void,
-        )));
-        Ok(bytes)
-    }
-}
-
-fn dpapi_decrypt(ciphertext: &[u8]) -> Result<Vec<u8>, String> {
-    if ciphertext.is_empty() {
-        return Ok(Vec::new());
-    }
-    unsafe {
-        let input = CRYPTOAPI_BLOB {
-            cbData: ciphertext.len() as u32,
-            pbData: ciphertext.as_ptr() as *mut u8,
-        };
-        let mut output = std::mem::zeroed::<CRYPTOAPI_BLOB>();
-        CryptUnprotectData(
-            &input,
-            None,
-            None,
-            None,
-            None,
-            CRYPTPROTECT_UI_FORBIDDEN,
-            &mut output,
-        )
-        .map_err(|e| format!("CryptUnprotectData failed: {}", e))?;
-        let bytes = std::slice::from_raw_parts(output.pbData, output.cbData as usize).to_vec();
-        let _ = windows::Win32::Foundation::LocalFree(Some(windows::Win32::Foundation::HLOCAL(
-            output.pbData as *mut std::ffi::c_void,
-        )));
-        Ok(bytes)
-    }
-}
-
-/// Encrypt all API keys in config JSON. Returns the modified JSON string.
-fn encrypt_config_keys(raw: &str) -> Result<String, String> {
-    let mut parsed: serde_json::Value = serde_json::from_str(raw).map_err(|e| e.to_string())?;
-    if let Some(providers) = parsed.get_mut("providers").and_then(|v| v.as_array_mut()) {
-        for provider in providers.iter_mut() {
-            if let Some(key) = provider.get_mut("apiKey").and_then(|v| v.as_str()) {
-                if !key.is_empty() && !looks_encrypted(key) {
-                    let plain = key.as_bytes();
-                    let enc = dpapi_encrypt(plain)?;
-                    let b64 = base64::engine::general_purpose::STANDARD.encode(&enc);
-                    provider["apiKey"] = serde_json::Value::String(b64);
-                }
-            }
-        }
-    }
-    serde_json::to_string_pretty(&parsed).map_err(|e| e.to_string())
-}
-
-/// Decrypt all API keys in config JSON. Returns the modified JSON string.
-fn decrypt_config_keys(raw: &str) -> Result<String, String> {
-    let mut parsed: serde_json::Value = serde_json::from_str(raw).map_err(|e| e.to_string())?;
-    if let Some(providers) = parsed.get_mut("providers").and_then(|v| v.as_array_mut()) {
-        for provider in providers.iter_mut() {
-            if let Some(key) = provider.get_mut("apiKey").and_then(|v| v.as_str()) {
-                if looks_encrypted(key) {
-                    let decoded = base64::engine::general_purpose::STANDARD
-                        .decode(key.as_bytes())
-                        .map_err(|e| e.to_string())?;
-                    let plain = dpapi_decrypt(&decoded)?;
-                    // Safe to unwrap — DPAPI decrypts to valid UTF-8 API keys
-                    provider["apiKey"] = serde_json::Value::String(
-                        String::from_utf8(plain).map_err(|e| e.to_string())?,
-                    );
-                }
-            }
-        }
-    }
-    serde_json::to_string_pretty(&parsed).map_err(|e| e.to_string())
-}
-
-/// Heuristic: DPAPI-encrypted base64 strings are longer than typical API keys
-fn looks_encrypted(key: &str) -> bool {
-    key.len() > 120
-        && key
-            .chars()
-            .all(|c| c.is_ascii_alphanumeric() || c == '+' || c == '/' || c == '=')
-}
+use tauri_plugin_store::StoreExt;
 
 // ── Path helpers ──
 
@@ -251,21 +138,50 @@ fn save_config(app: tauri::AppHandle, config: String) -> Result<(), String> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     }
-    // Encrypt API keys before persisting
+    // Ensure file exists for the store plugin to load
+    if !path.exists() {
+        fs::write(&path, "{}").map_err(|e| e.to_string())?;
+    }
     let encrypted = encrypt_config_keys(&config)?;
-    fs::write(&path, &encrypted).map_err(|e| e.to_string())
+    let store = app.store(path).map_err(|e| e.to_string())?;
+    // Clear legacy top-level keys when migrating from old raw-JSON format
+    for k in store.keys().clone() {
+        if k != "config" {
+            store.delete(&k);
+        }
+    }
+    store.set("config", serde_json::Value::String(encrypted));
+    store.save().map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 fn load_config(app: tauri::AppHandle) -> Result<String, String> {
     let path = get_config_path(&app);
-    if path.exists() {
-        let raw = fs::read_to_string(&path).map_err(|e| e.to_string())?;
-        // Decrypt API keys before returning to frontend
-        decrypt_config_keys(&raw)
-    } else {
-        Ok("{}".to_string())
+    if !path.exists() {
+        return Ok("{}".to_string());
     }
+    let store = app.store(path.clone()).map_err(|e| e.to_string())?;
+
+    // Try new store format first
+    if let Some(value) = store.get("config") {
+        if let Some(s) = value.as_str() {
+            return decrypt_config_keys(s);
+        }
+    }
+
+    // Migration: old format — config.json is a raw JSON file without "config" key
+    let raw = fs::read_to_string(&path).map_err(|e| e.to_string())?;
+    let decrypted = decrypt_config_keys(&raw)?;
+    let encrypted = encrypt_config_keys(&decrypted)?;
+
+    // Migrate to store format
+    for k in store.keys().clone() {
+        store.delete(&k);
+    }
+    store.set("config", serde_json::Value::String(encrypted));
+    let _ = store.save();
+
+    Ok(decrypted)
 }
 
 #[tauri::command]
@@ -302,7 +218,9 @@ fn save_image(app: tauri::AppHandle, id: String, base64_data: String) -> Result<
         .decode(data)
         .map_err(|e| e.to_string())?;
 
-    // Decode to image, then save as lossless PNG (preserves quality for AI analysis)
+    // Decode to image, then save as lossless PNG (preserves quality for AI analysis).
+    // Trade-off: photographic content may be ~2-4× larger than JPEG at equivalent quality,
+    // but this avoids generational loss and ensures analysis accuracy.
     let img = image::load_from_memory(&bytes).map_err(|e| e.to_string())?;
     let filename = format!("{}.png", id);
     let filepath = images_dir.join(&filename);
@@ -334,7 +252,11 @@ fn load_image(app: tauri::AppHandle, path: String) -> Result<String, String> {
     let filepath = PathBuf::from(&path);
     let images_dir = get_images_dir(&app);
     if !filepath.starts_with(&images_dir) {
-        return Err("Invalid image path".to_string());
+        return Err(format!(
+            "图片路径不在允许范围内: {} (必须在 {} 目录下)",
+            filepath.display(),
+            images_dir.display()
+        ));
     }
     if filepath.exists() {
         let bytes = fs::read(&filepath).map_err(|e| e.to_string())?;
@@ -348,8 +270,45 @@ fn load_image(app: tauri::AppHandle, path: String) -> Result<String, String> {
         };
         Ok(format!("data:{};base64,{}", mime, b64))
     } else {
-        Err("Image file not found".to_string())
+        Err(format!(
+            "图片文件不存在: {}",
+            filepath.display()
+        ))
     }
+}
+
+#[tauri::command]
+fn delete_record_by_id(app: tauri::AppHandle, record_id: String) -> Result<(), String> {
+    let path = get_history_path(&app);
+    if !path.exists() {
+        return Ok(());
+    }
+    let raw = fs::read_to_string(&path).map_err(|e| e.to_string())?;
+    let mut records: Vec<serde_json::Value> =
+        serde_json::from_str(&raw).map_err(|e| e.to_string())?;
+
+    // Clean up associated image file before removing the record
+    if let Some(target) = records
+        .iter()
+        .find(|r| r.get("id").and_then(|v| v.as_str()) == Some(&record_id))
+    {
+        if let Some(image_path) = target.get("imagePath").and_then(|v| v.as_str()) {
+            if !image_path.starts_with("data:") {
+                let filepath = PathBuf::from(image_path);
+                if filepath.exists() {
+                    let _ = fs::remove_file(&filepath);
+                }
+            }
+        }
+    }
+
+    records.retain(|r| r.get("id").and_then(|v| v.as_str()) != Some(&record_id));
+
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
+    fs::write(&path, serde_json::to_string_pretty(&records).unwrap_or_default())
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -417,10 +376,9 @@ fn read_clipboard_image() -> Result<String, String> {
 
 #[tauri::command]
 fn migrate_data(app: tauri::AppHandle, new_dir: String) -> Result<(), String> {
-    let old_dir = app
-        .path()
-        .app_data_dir()
-        .unwrap_or_else(|_| PathBuf::from("."));
+    // Use the app's own data directory (exe-relative for portable mode) instead of
+    // Tauri's default system path, so migration works correctly in portable builds.
+    let old_dir = app_data_dir(&app);
     let new_dir = PathBuf::from(&new_dir);
 
     // Validate: must be absolute, must differ from current data dir
@@ -498,16 +456,7 @@ fn pick_folder(app: tauri::AppHandle) -> Result<Option<String>, String> {
     Ok(folder.map(|p| p.to_string()))
 }
 
-#[tauri::command]
-fn pick_font_file(app: tauri::AppHandle) -> Result<Option<String>, String> {
-    use tauri_plugin_dialog::DialogExt;
-    let file = app
-        .dialog()
-        .file()
-        .add_filter("Fonts", &["ttf", "otf"])
-        .blocking_pick_file();
-    Ok(file.map(|p| p.to_string()))
-}
+
 
 #[tauri::command]
 fn set_autostart(enabled: bool) -> Result<(), String> {
@@ -615,16 +564,17 @@ async fn check_ocr_model_downloaded(app: tauri::AppHandle, engine: String) -> Re
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_clipboard_manager::init())
-        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             save_config,
             load_config,
             save_history,
             load_history,
+            delete_record_by_id,
             save_collections,
             load_collections,
             save_tags,
@@ -639,23 +589,10 @@ pub fn run() {
             toggle_maximize,
             hide_window,
             pick_folder,
-            pick_font_file,
             run_windows_ocr,
             check_windows_ocr,
             download_ocr_model,
-            list_plugins,
-            install_plugin,
-            uninstall_plugin,
-            enable_plugin,
-            disable_plugin,
-            get_plugin_state,
-            get_plugin,
-            fetch_registry,
-            get_cached_registry,
-            get_plugin_config,
-            set_plugin_config,
             check_ocr_model_downloaded,
-            read_plugin_file,
         ])
         .setup(|app| {
             let base = app_data_dir(app.handle());
@@ -665,16 +602,19 @@ pub fn run() {
             let data_subdir = base.join("data");
             let _ = fs::create_dir_all(&data_subdir);
             let _ = fs::create_dir_all(base.join("cache"));
-            let _ = fs::create_dir_all(base.join("plugins"));
-            let _ = fs::create_dir_all(get_data_dir(app.handle()));
-            // Plugins are now user-installed from registry (no longer bundled)
 
-            // Auto-migrate old JSON data files from root to data/ subdirectory
+
+            // Auto-migrate old config.json from root to data/ before any get_data_dir()
+            // call, so custom dataDir from config is picked up correctly (#18).
             let old_config = base.join("config.json");
             let new_config = data_subdir.join("config.json");
             if old_config.exists() && !new_config.exists() {
                 let _ = fs::rename(&old_config, &new_config);
             }
+
+            // Now safe: get_data_dir can read migrated config
+            let _ = fs::create_dir_all(get_data_dir(app.handle()));
+            // Plugins are now user-installed from registry (no longer bundled)
 
             let data_dir = get_data_dir(app.handle());
             let old_hist = data_dir.join("history.json");
@@ -780,6 +720,9 @@ pub fn run() {
             let tray_icon = tauri::image::Image::from_bytes(include_bytes!("../icons/32x32.png"))
                 .unwrap_or_else(|_| tauri::image::Image::new(&[], 1, 1));
 
+            // ── Tray debounce lock: prevents show/hide race on rapid double-click ──
+            let tray_lock = std::sync::Arc::new(AtomicBool::new(false));
+
             let _tray = TrayIconBuilder::new()
                 .icon(tray_icon)
                 .menu(&menu)
@@ -796,7 +739,7 @@ pub fn run() {
                     }
                     _ => {}
                 })
-                .on_tray_icon_event(|tray, event| {
+                .on_tray_icon_event(move |tray, event| {
                     if let TrayIconEvent::Click {
                         button,
                         button_state,
@@ -804,6 +747,17 @@ pub fn run() {
                     } = event
                     {
                         if button == MouseButton::Left && button_state == MouseButtonState::Up {
+                            // Debounce: ignore clicks while a previous operation is in progress
+                            if tray_lock.compare_exchange(
+                                false,
+                                true,
+                                Ordering::Acquire,
+                                Ordering::Relaxed,
+                            ).is_err()
+                            {
+                                return;
+                            }
+
                             let app = tray.app_handle();
                             if let Some(w) = app.get_webview_window("main") {
                                 if w.is_visible().unwrap_or(false) {
@@ -813,6 +767,13 @@ pub fn run() {
                                     let _ = w.set_focus();
                                 }
                             }
+
+                            // Release lock after a short guard period (300ms)
+                            let lock = tray_lock.clone();
+                            std::thread::spawn(move || {
+                                std::thread::sleep(std::time::Duration::from_millis(300));
+                                lock.store(false, Ordering::Release);
+                            });
                         }
                     }
                 })

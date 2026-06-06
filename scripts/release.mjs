@@ -92,12 +92,18 @@ let about = readFileSync(aboutPath, 'utf8');
 about = about.replace(/const VERSION = '\d+\.\d+\.\d+'/, `const VERSION = '${newVer}'`);
 writeFileSync(aboutPath, about);
 
+const pkgPath = join(root, 'package.json');
+let pkg = readFileSync(pkgPath, 'utf8');
+pkg = pkg.replace(/"version"\s*:\s*"\d+\.\d+\.\d+"/, `"version": "${newVer}"`);
+writeFileSync(pkgPath, pkg);
+
 console.log('✅ Version bumped\n');
 
 // ── Step 1.5: Generate changelog ──
 let changelog = '';
 try {
-  const prevTag = execSilent('git tag --sort=-v:refname | head -1');
+  const prevTags = execSilent('git tag --sort=-v:refname');
+  const prevTag = prevTags ? prevTags.split('\n')[0].trim() : '';
   if (prevTag) {
     const log = execSilent(`git log ${prevTag}..HEAD --pretty=format:"- %s" --no-merges`);
     if (log) {
@@ -222,7 +228,7 @@ if (existsSync(localChangelogPath)) {
 
 // ── Step 7: Commit version bump + push to main repo ──
 console.log('📤 Committing version bump...');
-execSilent('git add src-tauri/Cargo.toml src-tauri/tauri.conf.json src/components/settings/AboutTab.tsx');
+execSilent('git add src-tauri/Cargo.toml src-tauri/tauri.conf.json src/components/settings/AboutTab.tsx package.json');
 execSilent(`git commit -m "Bump version to ${newVer}"`);
 try {
   execSilent('git push');

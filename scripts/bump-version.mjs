@@ -52,4 +52,15 @@ if (aboutMatch) {
   console.log(`AboutTab.tsx: ${aboutMatch[0].match(/\d+\.\d+\.\d+/)[0]} → ${newVer}`);
 }
 
+// Update package.json
+const pkgPath = join(root, 'package.json');
+let pkg = readFileSync(pkgPath, 'utf8');
+const pkgMatch = pkg.match(/"version"\s*:\s*"(\d+\.\d+\.\d+)"/);
+if (pkgMatch) {
+  const newVer2 = bumpVersion(pkgMatch[1]);
+  pkg = pkg.replace(/"version"\s*:\s*"\d+\.\d+\.\d+"/, `"version": "${newVer2}"`);
+  writeFileSync(pkgPath, pkg);
+  console.log(`package.json: ${pkgMatch[1]} → ${newVer2}`);
+}
+
 console.log('Version bump complete.');

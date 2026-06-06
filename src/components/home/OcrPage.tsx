@@ -10,8 +10,7 @@ import { useToast } from "../Toast";
 import { useCroppedImage } from "../../hooks/useCroppedImage";
 import OcrResultView from "../result/OcrResultView";
 import ImageDropZone from "./ImageDropZone";
-import zh from "../../locales/zh.json";
-import en from "../../locales/en.json";
+import { getT } from "../utils/i18n";
 
 interface OcrPageProps {
 	theme: AppTheme;
@@ -22,7 +21,7 @@ interface OcrPageProps {
 }
 
 const OcrPage = ({ theme, lang, config }: OcrPageProps) => {
-	const t = lang === "zh" ? zh : en;
+	const t = getT(lang);
 	const colors = theme.colors;
 	const toast = useToast();
 	const [ocrImage, setOcrImage] = useState<string | null>(null);
@@ -73,15 +72,6 @@ const OcrPage = ({ theme, lang, config }: OcrPageProps) => {
 		}
 	};
 
-	const handleDropFiles = async (files: File[]) => {
-		try {
-			const dataUrl = await base64FromFile(files[0]);
-			loadImage(dataUrl);
-		} catch {
-			toast.show(t.fileReadFailed, "error");
-		}
-	};
-
 	const handleUrlPaste = async (url: string) => {
 		try {
 			toast.show(t.downloadImage, "info");
@@ -110,7 +100,6 @@ const OcrPage = ({ theme, lang, config }: OcrPageProps) => {
 					colors={colors}
 					onClipboard={handleClipboard}
 					onFileSelect={handleFileSelect}
-					onDropFiles={handleDropFiles}
 					onUrlPaste={handleUrlPaste}
 				/>
 			</div>

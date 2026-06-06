@@ -9,6 +9,10 @@ src-tauri/target/
 public/tesseract/*.traineddata.gz
 plugins/*.zip
 
+# ── Compiled plugin artifacts ──
+plugins/*/index.js
+plugins/*/settings.js
+
 SPEC.md
 CLAUDE.md
 .githooks/

@@ -1,7 +1,6 @@
 import { ArrowLeft, Trash, Folder, Tray, Heart, Star, BookmarkSimple, Flag, Lightning, Palette } from '@phosphor-icons/react';
 import type { Collection } from '../../types';
-import zh from '../../locales/zh.json';
-import en from '../../locales/en.json';
+import { getT } from '../../utils/i18n';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ICON_MAP: Record<string, any> = { Folder, Tray, Heart, Star, BookmarkSimple, Flag, Lightning, Palette };
@@ -17,7 +16,7 @@ interface CollectionHeaderProps {
 }
 
 const CollectionHeader = ({ collection, recordCount, colors, lang, isBuiltIn, onBack, onDelete }: CollectionHeaderProps) => {
-  const t = lang === 'zh' ? zh : en;
+  const t = getT(lang);
   const IconComp = ICON_MAP[collection.icon] || Folder;
   return (
     <div style={{

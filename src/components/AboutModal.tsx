@@ -5,7 +5,7 @@ import { ABOUT_MODAL_WIDTH } from '../styles';
 import { useToast } from './Toast';
 import { tauriInvoke, createIpcChannel } from '../utils/tauri';
 import AboutTab from './settings/AboutTab';
-import zh from '../locales/zh.json';
+import { getT } from '../utils/i18n';
 import en from '../locales/en.json';
 
 interface AboutModalProps {
@@ -15,7 +15,7 @@ interface AboutModalProps {
 }
 
 const AboutModal = ({ theme, lang, onClose }: AboutModalProps) => {
-  const t = lang === 'zh' ? zh : en;
+  const t = getT(lang);
   const colors = theme.colors;
   const toast = useToast();
   const toastTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);

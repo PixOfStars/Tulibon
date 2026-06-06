@@ -8,13 +8,12 @@ interface InputSectionProps {
   isAnalyzing: boolean;
   onClipboard: () => void;
   onFileSelect: (files: FileList) => void;
-  onDropFiles: (files: File[]) => void;
   onUrlPaste: (url: string) => void;
 }
 
 const InputSection = ({
   config, themeColors: colors, analysisMode, onModeChange, isAnalyzing,
-  onClipboard, onFileSelect, onDropFiles, onUrlPaste,
+  onClipboard, onFileSelect, onUrlPaste,
 }: InputSectionProps) => {
   const lang = config.prefLang;
 
@@ -43,7 +42,7 @@ const InputSection = ({
         <ImageDropZone
           config={config} colors={colors} isAnalyzing={isAnalyzing}
           onClipboard={onClipboard} onFileSelect={onFileSelect}
-          onDropFiles={onDropFiles} onUrlPaste={onUrlPaste}
+          onUrlPaste={onUrlPaste}
         />
       </div>
     </>

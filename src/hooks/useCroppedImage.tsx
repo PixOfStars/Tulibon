@@ -6,8 +6,8 @@ import type { CropRect } from "../types";
 interface UseCroppedImageOptions {
 	colors: Record<string, string>;
 	lang: "zh" | "en";
-	/** 确认裁剪后的回调，参数为原始图片 URL */
-	onCropConfirm?: (imageUrl: string) => void;
+	/** 确认裁剪后的回调，参数为原始图片 URL 和裁剪选区 */
+	onCropConfirm?: (imageUrl: string, cropRect: CropRect | null) => void;
 }
 
 interface UseCroppedImageResult {
@@ -68,9 +68,9 @@ export function useCroppedImage({
 		setCroppedDataUrl(cropImage);
 		setCropImage(null);
 		setCropRect(null);
-		onCropConfirm?.(cropImage);
+		onCropConfirm?.(cropImage, cropRect);
 		return cropImage;
-	}, [cropImage, setCropRect, onCropConfirm]);
+	}, [cropImage, cropRect, setCropRect, onCropConfirm]);
 
 	const cropComponent = cropImage ? (
 		<CropPanel
