@@ -1,11 +1,13 @@
 import { useState, useRef, useCallback } from "react";
 import { X } from "@phosphor-icons/react";
 import type { AppTheme } from "../../styles/theme";
-import { ABOUT_MODAL_WIDTH } from "../../styles/styles";
+import { ABOUT_MODAL_WIDTH } from "../../styles/layoutConstants";
 import { useToast } from "../common/Toast";
 import { tauriInvoke, createIpcChannel } from "../../utils/tauri";
 import AboutTab from "../settings/AboutTab";
 import { getT } from "../../utils/i18n";
+import { sectionTitle } from '../../styles/components';
+import { flexBetween } from '../../styles/layout';
 
 interface AboutModalProps {
 	theme: AppTheme;
@@ -95,16 +97,12 @@ const AboutModal = ({ theme, lang, onClose }: AboutModalProps) => {
 				{/* Header */}
 				<div
 					style={{
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "space-between",
+						...flexBetween,
 						padding: "14px 20px",
 						borderBottom: `1px solid ${colors.border}`,
 					}}
 				>
-					<span
-						style={{ fontSize: 14, fontWeight: 700, color: colors.textHeader }}
-					>
+					<span style={{ ...sectionTitle(colors) }}>
 						{t.aboutTab || "About"}
 					</span>
 					<button

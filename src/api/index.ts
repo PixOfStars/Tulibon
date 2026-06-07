@@ -1,5 +1,5 @@
-import { callGeminiAI } from './gemini';
-import { callOpenAICompatible } from './openai';
+import { callGeminiAI } from './geminiProvider';
+import { callOpenAICompatible } from './openaiProvider';
 import type { ProviderConfig, AnalysisResult, ModeProfile, StylePreset } from '../types';
 
 export type { AnalysisResult };

@@ -5,6 +5,7 @@ import {
     DEFAULT_STYLE_PRESETS,
 } from "../types";
 import type { AppConfig, ProviderConfig } from "../types";
+import { DEFAULT_OCR_ENGINE, DEFAULT_OCR_API_CONFIGS } from "../types/ocr";
 import { tauriInvoke } from "../utils/tauri";
 
 export const DEFAULT_CONFIG: AppConfig = {
@@ -31,6 +32,8 @@ export const DEFAULT_CONFIG: AppConfig = {
     quickSave: true,
     sidebarWidth: 180,
     sidebarOrder: [],
+    ocrEngine: DEFAULT_OCR_ENGINE,
+    ocrApiConfigs: DEFAULT_OCR_API_CONFIGS,
 };
 
 export function usePreferences() {
@@ -56,6 +59,10 @@ export function usePreferences() {
                                 inputMethods: {
                                     ...DEFAULT_CONFIG.inputMethods,
                                     ...(saved.inputMethods || {}),
+                                },
+                                ocrApiConfigs: {
+                                    ...DEFAULT_CONFIG.ocrApiConfigs,
+                                    ...(saved.ocrApiConfigs || {}),
                                 },
                             };
                             setConfig(mergedConfig);

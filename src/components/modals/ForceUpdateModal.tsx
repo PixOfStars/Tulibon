@@ -1,5 +1,6 @@
 import { DownloadSimple, RocketLaunch } from "@phosphor-icons/react";
 import type { AppTheme } from "../../styles/theme";
+import { card } from '../../styles/components';
 
 interface ForceUpdateModalProps {
 	theme: AppTheme;
@@ -31,16 +32,11 @@ const ForceUpdateModal = ({
 			<div
 				onClick={(e) => e.stopPropagation()}
 				style={{
-					backgroundColor: colors.bg,
-					borderRadius: 16,
-					padding: 32,
+					...card(colors, { padding: 32 }),
 					maxWidth: 400,
 					width: "90%",
 					textAlign: "center",
 					boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
-					border: `1px solid ${colors.border}`,
-					display: "flex",
-					flexDirection: "column",
 					alignItems: "center",
 					gap: 16,
 				}}

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useCropHandlers } from "./useCropHandlers";
-import CropPanel from "../components/home/CropPanel";
+import ImageCropPanel from "../components/home/ImageCropPanel";
 import type { CropRect } from "../types";
 
 interface UseCroppedImageOptions {
@@ -73,7 +73,7 @@ export function useCroppedImage({
 	}, [cropImage, cropRect, setCropRect, onCropConfirm]);
 
 	const cropComponent = cropImage ? (
-		<CropPanel
+		<ImageCropPanel
 			cropImage={cropImage}
 			cropRect={cropRect}
 			themeColors={colors}

@@ -1,4 +1,6 @@
 import type React from 'react';
+import { border } from '../../styles/components';
+import { flexBetween, flexRow } from '../../styles/layout';
 
 type Colors = Record<string, string>;
 
@@ -10,7 +12,7 @@ export const inputStyle = (colors: Colors): React.CSSProperties => ({
   width: '100%',
   padding: '10px 14px',
   backgroundColor: colors.grayBg,
-  border: `1px solid ${colors.border}`,
+  ...border(colors as any),
   borderRadius: 10, // 统一使用 10px 以配合整体 UI 语言
   color: colors.textHeader,
   fontSize: 13,
@@ -23,7 +25,7 @@ export const iconBtnStyle = (colors: Colors): React.CSSProperties => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  border: `1px solid ${colors.border}`,
+  ...border(colors as any),
   backgroundColor: colors.bg,
   color: colors.textHeader,
   borderRadius: 8,
@@ -71,9 +73,7 @@ export const ToggleRow = ({
   <div 
     onClick={onChange}
     style={{
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'space-between',
+      ...flexBetween,
       padding: '10px 14px', 
       borderRadius: 12, // 更圆润的点击区域
       backgroundColor: colors.grayBg, 
@@ -89,7 +89,7 @@ export const ToggleRow = ({
       if (!checked) e.currentTarget.style.backgroundColor = colors.grayBg;
     }}
   >
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div style={{ ...flexRow(12) }}>
       <Icon size={20} weight={checked ? "fill" : "bold"} color={checked ? colors.accent : colors.text} />
       <span style={{ fontSize: 13, fontWeight: 600, color: checked ? colors.textHeader : colors.text }}>
         {label}

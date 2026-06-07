@@ -13,7 +13,6 @@ plugins/*.zip
 plugins/*/index.js
 plugins/*/settings.js
 
-SPEC.md
 CLAUDE.md
 .githooks/
 tsconfig.app.tsbuildinfo

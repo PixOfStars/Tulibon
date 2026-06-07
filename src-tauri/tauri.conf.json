@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicedoc/tauri/refs/heads/dev/.schemas/config.schema.json",
   "productName": "Tulibon",
-  "version": "0.30.9",
+  "version": "0.31.0",
   "identifier": "com.Tulibon.app",
   "build": {
     "frontendDist": "../dist",
@@ -16,7 +16,7 @@
         "width": 920,
         "height": 760,
         "minWidth": 920,
-        "minHeight": 560,
+        "minHeight": 680,
         "resizable": true,
         "decorations": false,
         "center": true,

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import {
     WarningCircle,
     X,
@@ -14,9 +14,9 @@ import type {
 import ResultView from "../result/ResultView";
 import { useToast } from "../common/Toast";
 import InputSection from "./InputSection";
-import BatchPanel from "./BatchPanel";
+import BatchProgressBar from "./BatchProgressBar";
 import HistoryPanel, { EmptyState } from "./HistoryPanel";
-import LoadingState from "./LoadingState";
+import AnalyzingState from "./AnalyzingState";
 import CollectionHeader from "./CollectionHeader";
 import CollectionsView from "./CollectionsView";
 import { useHomeActions } from "../../hooks/useHomeActions";
@@ -28,6 +28,7 @@ import OcrPage from "./OcrPage";
 import { useTagManagement } from "../../hooks/useTagManagement";
 import { useUndoManager } from "../../hooks/useUndoManager";
 import { getT } from "../../utils/i18n";
+import { scrollContainer } from '../../styles/layout';
 
 // ==========================================
 // 提取的本地子组件 (UI 分离)
@@ -35,9 +36,8 @@ import { getT } from "../../utils/i18n";
 
 const BrowseHeader = ({ count, colors, t }: { count: number; colors: Record<string, string>; t: Record<string, string> }) => (
     <div className="fade-in-fast" style={{ padding: "12px 20px 6px" }}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: colors.textHeader }}>{t.history}</div>
-        <div style={{ fontSize: 11, color: colors.text, opacity: 0.5, marginTop: 2 }}>
-            {t.recordCount.replace("{n}", String(count))}
+        <div style={{ fontSize: 16, fontWeight: 700, color: colors.textHeader }}>
+            {t.history}（{count}{t.recordCountUnit || "条"}）
         </div>
     </div>
 );
@@ -112,8 +112,19 @@ const Home = ({
     const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
     const [currentResult, setCurrentResult] = useState<AnalysisRecord | null>(null);
+    const [selectedRecord, setSelectedRecord] = useState<AnalysisRecord | null>(null);
     const [batchItems, setBatchItems] = useState<BatchItem[]>([]);
     const [batchRunning, setBatchRunning] = useState(false);
+
+    // 切换到 analyze 模式时，重置为初始状态
+    useEffect(() => {
+        if (viewMode === "analyze") {
+            setCurrentResult(null);
+            setSelectedRecord(null);
+            setStatus("idle");
+            setErrorMsg("");
+        }
+    }, [viewMode]);
 
     const runAnalysisRef = useRef<((img: string, mode: string, src: ImageSource, crop?: CropRect) => Promise<AnalysisRecord | null>) | null>(null);
 
@@ -193,7 +204,7 @@ const Home = ({
                 <HistoryPanel
                     records={list} tags={tags} collections={collections} themeColors={colors}
                     lang={config.prefLang} isCollectionView={!!collectionFilter}
-                    onSelectRecord={(record) => { setCurrentResult(record); setStatus("done"); crop.cancelCrop(); }}
+                    onSelectRecord={(record) => { setSelectedRecord(record); }}
                 />
             )}
         </div>
@@ -209,13 +220,14 @@ const Home = ({
         }
 
         return (
-            <div style={{ flex: 1, overflow: "auto", padding: "0 20px 16px", position: "relative" }}>
+            // 页面切换滑动动画：根据 viewMode 添加不同的进入方向
+            <div className={viewMode === "browse" || viewMode === "collection" ? "page-enter-right" : viewMode === "analyze" ? "page-enter-left" : ""} style={{ ...scrollContainer, padding: "0 20px 16px" }}>
                 {/* 状态展示 */}
-                {isAnalyzing && !crop.isCropping && showAnalyzeUi && <LoadingState colors={colors} t={t} />}
+                {isAnalyzing && !crop.isCropping && showAnalyzeUi && <AnalyzingState colors={colors} t={t} />}
                 {status === "error" && showAnalyzeUi && <ErrorState errorMsg={errorMsg} onDismiss={() => { setStatus("idle"); setErrorMsg(""); }} colors={colors} t={t} />}
 
-                {/* 结果展示（不限制 showAnalyzeUi，browse/analyze 模式都可查看） */}
-                {status === "done" && currentResult && !crop.isCropping && (
+                {/* 分析结果展示（仅 analyze 模式且无 selectedRecord 时） */}
+                {showAnalyzeUi && status === "done" && currentResult && !crop.isCropping && !selectedRecord && (
                     <div style={{ paddingTop: 8 }}>
                         <ResultView
                             record={currentResult} theme={theme} lang={config.prefLang} tags={tags} collections={collections}
@@ -226,29 +238,52 @@ const Home = ({
                             onAddUserTag={(name) => handleAddUserTag(currentResult.id, name)}
                             onRemoveUserTag={(tagId) => handleRemoveUserTag(currentResult.id, tagId)}
                             defaultExportFormat={config.exportFormat}
+                            onBack={() => { setCurrentResult(null); setStatus("idle"); }}
                         />
                     </div>
                 )}
 
                 {/* 批量操作面板 */}
                 {showAnalyzeUi && batchItems.length > 0 && (
-                    <BatchPanel batchItems={batchItems} batchRunning={batchRunning} themeColors={colors} lang={config.prefLang} onStart={handleBatchStart} onClear={() => setBatchItems([])} onRemove={(id) => setBatchItems((prev) => prev.filter((it) => it.id !== id))} />
+                    <BatchProgressBar batchItems={batchItems} batchRunning={batchRunning} themeColors={colors} lang={config.prefLang} onStart={handleBatchStart} onClear={() => setBatchItems([])} onRemove={(id) => setBatchItems((prev) => prev.filter((it) => it.id !== id))} />
                 )}
 
-                {/* 历史记录列表区 */}
+                {/* 历史记录 / 收藏夹：列表或详情 */}
                 {["analyze", "browse", "collection"].includes(viewMode) && (
                     <>
-                        {viewMode === "browse" && status !== "done" && renderRecordList(records)}
-
-                        {isCollectionView && activeCollection && (
-                            <CollectionHeader
-                                collection={activeCollection} recordCount={displayHistory.length} colors={colors} lang={config.prefLang} isBuiltIn={activeCollection.id.startsWith("__")}
-                                onBack={() => onNavigate?.("collections")}
-                                onDelete={activeCollection.id.startsWith("__") ? undefined : () => onDeleteCollection?.(activeCollection.id)}
-                            />
+                        {/* 详情视图：点击历史卡片后显示 */}
+                        {selectedRecord && (
+                            <div className="fade-in" style={{ paddingTop: 8 }}>
+                                <ResultView
+                                    record={selectedRecord} theme={theme} lang={config.prefLang} tags={tags} collections={collections}
+                                    onToggleCollection={(collId) => toggleCollection(selectedRecord.id, collId)}
+                                    onDelete={() => { deleteRecord(selectedRecord.id, triggerUndo); setSelectedRecord(null); }}
+                                    onExport={(fmt) => exportRecord(selectedRecord, fmt)}
+                                    onCopy={(text) => { navigator.clipboard.writeText(text); toast.show(t.copiedToClipboard, "success"); }}
+                                    onAddUserTag={(name) => handleAddUserTag(selectedRecord.id, name)}
+                                    onRemoveUserTag={(tagId) => handleRemoveUserTag(selectedRecord.id, tagId)}
+                                    defaultExportFormat={config.exportFormat}
+                                    onBack={() => setSelectedRecord(null)}
+                                />
+                            </div>
                         )}
-                        {isCollectionView && displayHistory.length > 0 && renderRecordList(displayHistory)}
-                        
+
+                        {/* 列表视图：仅在未选中详情时显示 */}
+                        {!selectedRecord && (
+                            <>
+                                {viewMode === "browse" && renderRecordList(records)}
+
+                                {isCollectionView && activeCollection && (
+                                    <CollectionHeader
+                                        collection={activeCollection} recordCount={displayHistory.length} colors={colors} lang={config.prefLang} isBuiltIn={activeCollection.id.startsWith("__")}
+                                        onBack={() => onNavigate?.("collections")}
+                                        onDelete={activeCollection.id.startsWith("__") ? undefined : () => onDeleteCollection?.(activeCollection.id)}
+                                    />
+                                )}
+                                {isCollectionView && displayHistory.length > 0 && renderRecordList(displayHistory)}
+                            </>
+                        )}
+
                         {showEmpty && <EmptyState colors={colors} isCollectionView={false} t={t} />}
                     </>
                 )}
@@ -258,17 +293,18 @@ const Home = ({
 
     return (
         <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            {/* 顶部分析输入区域：仅在 idle/error 时显示，loading/done 时隐藏以释放空间 */}
-            {showAnalyzeUi && (status === "idle" || status === "error") && (
+            {/* 顶部分析输入区域：仅在 idle/error 且未裁剪时显示 */}
+            {showAnalyzeUi && (status === "idle" || status === "error") && !crop.isCropping && (
                 <div>
                     <InputSection
                         config={config} themeColors={colors} analysisMode={analysisMode}
                         onModeChange={setAnalysisMode} isAnalyzing={isAnalyzing}
                         onClipboard={handleClipboard} onFileSelect={handleFileSelect} onUrlPaste={handleUrlPaste}
                     />
-                    {crop.cropComponent}
                 </div>
             )}
+            {/* 裁剪组件始终渲染（独立于输入区的折叠逻辑） */}
+            {crop.cropComponent}
 
             {/* 各模式的 Header */}
             {viewMode === "browse" && <BrowseHeader count={records.length} colors={colors} t={t} />}

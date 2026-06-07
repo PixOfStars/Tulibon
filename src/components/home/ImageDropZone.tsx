@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { ClipboardText, Link, UploadSimple } from "@phosphor-icons/react";
+import { ClipboardText, Link, CloudArrowUp, Image as ImageIcon, ArrowLineLeft } from "@phosphor-icons/react";
 import { getT } from "../../utils/i18n";
 import { tauriListen } from "../../utils/tauri";
 
@@ -26,6 +26,7 @@ const ImageDropZone = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [urlInput, setUrlInput] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   // ── Listen for Tauri native file-drop events ──
   useEffect(() => {
@@ -84,9 +85,29 @@ const ImageDropZone = ({
     }
   };
 
+  // 生成漂亮的键盘按键样式
+  const renderKbd = (text: string) => (
+    <kbd style={{
+      padding: "2px 6px",
+      borderRadius: 4,
+      backgroundColor: colors.bg,
+      border: `1px solid ${colors.border}`,
+      boxShadow: "0 1px 1px rgba(0,0,0,0.05), inset 0 -1px 0 rgba(0,0,0,0.05)",
+      fontFamily: "inherit",
+      fontSize: 10,
+      fontWeight: 700,
+      color: colors.text,
+      margin: "0 2px"
+    }}>
+      {text}
+    </kbd>
+  );
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* 统一的大型拖拽/点击上传面板 */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* ==========================================
+          1. 核心拖拽区 (Hero Drop Zone)
+          ========================================== */}
       <div
         onPaste={handlePaste}
         onDragOver={handleDragOver}
@@ -94,62 +115,88 @@ const ImageDropZone = ({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => config.inputMethods.filePicker && fileInputRef.current?.click()}
+        onMouseEnter={() => !isAnalyzing && setIsHovered(true)}
+        onMouseLeave={() => !isAnalyzing && setIsHovered(false)}
         style={{
-          border: `2px dashed ${isDragOver ? colors.accent : colors.border}`,
-          borderRadius: 16,
+          position: "relative",
+          border: `2px dashed ${isDragOver ? colors.accent : (isHovered ? `${colors.accent}80` : colors.border)}`,
+          borderRadius: 20, // 更大的圆角
           padding: '40px 20px',
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           gap: 16,
-          backgroundColor: isDragOver ? colors.accentBg : colors.grayBg,
-          transition: "all 0.2s ease",
-          minHeight: 180,
+          backgroundColor: isDragOver ? `${colors.accent}10` : (isHovered ? `${colors.accent}05` : colors.grayBg),
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          minHeight: 220, // 增加高度，显得更舒展
           cursor: config.inputMethods.filePicker && !isAnalyzing ? "pointer" : "default",
           opacity: isAnalyzing ? 0.6 : 1,
           pointerEvents: isAnalyzing ? "none" : "auto",
         }}
-        onMouseEnter={e => {
-          if (!isAnalyzing && !isDragOver) e.currentTarget.style.backgroundColor = `${colors.accent}08`;
-        }}
-        onMouseLeave={e => {
-          if (!isAnalyzing && !isDragOver) e.currentTarget.style.backgroundColor = colors.grayBg;
-        }}
       >
-        <UploadSimple 
-          size={42} 
-          weight="light" 
-          color={isDragOver ? colors.accent : colors.text} 
-          style={{ opacity: isDragOver ? 1 : 0.6, transition: "all 0.2s" }} 
-        />
+        {/* 悬浮质感的图标圆盘 */}
+        <div style={{
+          width: 64,
+          height: 64,
+          borderRadius: "50%",
+          backgroundColor: colors.bg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: isDragOver 
+            ? `0 0 0 6px ${colors.accent}20, 0 8px 24px ${colors.accent}40` 
+            : (isHovered ? `0 8px 24px rgba(0,0,0,0.08)` : `0 4px 12px rgba(0,0,0,0.04)`),
+          border: `1px solid ${colors.border}`,
+          transform: isHovered || isDragOver ? "translateY(-4px)" : "translateY(0)",
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          color: isDragOver || isHovered ? colors.accent : colors.text,
+        }}>
+          {isDragOver ? (
+            <ImageIcon size={32} weight="fill" />
+          ) : (
+            <CloudArrowUp size={32} weight="duotone" />
+          )}
+        </div>
         
-        <div style={{ textAlign: "center", display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: colors.textHeader }}>
-            {t.dragHere || "点击选择文件，或将图片拖拽至此"}
+        {/* 引导文案 */}
+        <div style={{ textAlign: "center", display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: colors.textHeader }}>
+            {t.dragHere || "点击选择图片，或拖拽到这里"}
           </div>
-          <div style={{ fontSize: 12, color: colors.text, opacity: 0.8 }}>
-            {config.prefLang === 'zh' ? "支持直接粘贴图片 (Ctrl+V)" : "Supports pasting images directly (Ctrl+V)"}
+          <div style={{ fontSize: 12, color: colors.text, opacity: 0.7, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {config.prefLang === 'zh' ? (
+              <span>支持直接复制并 {renderKbd("Ctrl")} {renderKbd("V")} 粘贴</span>
+            ) : (
+              <span>Paste directly using {renderKbd("Ctrl")} {renderKbd("V")}</span>
+            )}
           </div>
         </div>
 
-        {/* 面板内部的辅助操作按钮，阻止事件冒泡以免触发选择文件 */}
+        {/* 内部操作：剪贴板快捷按钮 (胶囊样式) */}
         {config.inputMethods.clipboard && (
-          <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 4 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 8 }}>
             <button
               onClick={onClipboard}
               disabled={isAnalyzing}
               style={{
                 display: "flex", alignItems: "center", gap: 6,
-                padding: "8px 16px", borderRadius: 8,
+                padding: "8px 16px", borderRadius: 100, // 满圆角胶囊
                 border: `1px solid ${colors.border}`,
-                backgroundColor: colors.bg, color: colors.textHeader,
-                fontSize: 12, fontWeight: 500, cursor: "pointer",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.02)",
-                transition: "all 0.15s"
+                backgroundColor: colors.bg, 
+                color: colors.textHeader,
+                fontSize: 12, fontWeight: 600, cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                transition: "all 0.2s ease"
               }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = colors.accent}
-              onMouseLeave={e => e.currentTarget.style.borderColor = colors.border}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = colors.accent;
+                e.currentTarget.style.color = colors.accent;
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = colors.border;
+                e.currentTarget.style.color = colors.textHeader;
+              }}
             >
               <ClipboardText size={16} weight="bold" />
               <span>{t.fromClipboard}</span>
@@ -170,23 +217,34 @@ const ImageDropZone = ({
         }}
       />
 
-      {/* 链接输入框移出虚线框，作为补充输入方式，并弱化边框感 */}
+      {/* ==========================================
+          2. 链接输入区 (精致的搜索框样式)
+          ========================================== */}
       {config.inputMethods.urlPaste && (
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 8,
-            padding: "10px 16px",
-            borderRadius: 12,
+            gap: 10,
+            padding: "8px 12px 8px 16px",
+            borderRadius: 14,
             backgroundColor: colors.grayBg,
-            border: '1px solid transparent',
-            transition: 'border-color 0.2s',
+            border: `1px solid ${colors.border}`,
+            boxShadow: "inset 0 2px 4px rgba(0,0,0,0.02)",
+            transition: 'all 0.2s',
           }}
-          onFocus={e => e.currentTarget.style.borderColor = colors.accent}
-          onBlur={e => e.currentTarget.style.borderColor = 'transparent'}
+          onFocus={e => {
+            e.currentTarget.style.borderColor = colors.accent;
+            e.currentTarget.style.backgroundColor = colors.bg;
+            e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.accent}15`;
+          }}
+          onBlur={e => {
+            e.currentTarget.style.borderColor = colors.border;
+            e.currentTarget.style.backgroundColor = colors.grayBg;
+            e.currentTarget.style.boxShadow = "inset 0 2px 4px rgba(0,0,0,0.02)";
+          }}
         >
-          <Link size={16} weight="bold" color={colors.text} style={{ opacity: 0.6 }} />
+          <Link size={18} weight="bold" color={colors.text} style={{ opacity: 0.5 }} />
           <input
             type="text"
             value={urlInput}
@@ -216,6 +274,26 @@ const ImageDropZone = ({
               }
             }}
           />
+          
+          {/* 输入内容后，平滑滑出“回车”提示 */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+            opacity: urlInput.trim() ? 1 : 0,
+            transform: urlInput.trim() ? "translateX(0)" : "translateX(10px)",
+            transition: "all 0.2s ease",
+            pointerEvents: "none" // 不阻挡点击
+          }}>
+            <span style={{ fontSize: 11, color: colors.accent, fontWeight: 600 }}>Enter</span>
+            <div style={{ 
+              display: "flex", alignItems: "center", justifyContent: "center",
+              width: 24, height: 24, borderRadius: 6, 
+              backgroundColor: colors.accent, color: "#000" 
+            }}>
+              <ArrowLineLeft size={14} weight="bold" />
+            </div>
+          </div>
         </div>
       )}
     </div>

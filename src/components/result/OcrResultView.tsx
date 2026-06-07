@@ -4,11 +4,13 @@ import {
 	recognize as ocrRecognize,
 	checkEngine,
 } from "../../api/ocrManager";
+import type { AppConfig } from "../../types";
 
 interface OcrResultViewProps {
 	imageDataUrl: string;
 	colors: Record<string, string>;
 	t: Record<string, string>;
+	config: AppConfig;
 }
 
 type ButtonState = "idle" | "initializing" | "recognizing" | "done" | "error";
@@ -17,6 +19,7 @@ function OcrResultView({
 	imageDataUrl,
 	colors,
 	t,
+	config,
 }: OcrResultViewProps) {
 	const [text, setText] = useState("");
 	const [error, setError] = useState("");
@@ -34,7 +37,14 @@ function OcrResultView({
 		setRan(false);
 
 		try {
-			const state = await checkEngine({ engine: "windows" });
+			const engine = config.ocrEngine || "windows";
+			const lang = config.prefLang === "en" ? "en" : "zh-Hans";
+
+			const state = await checkEngine({
+				engine,
+				lang,
+				apiConfigs: config.ocrApiConfigs,
+			});
 
 			if (state.status === "error") {
 				throw new Error(state.error || "Engine check failed");
@@ -44,8 +54,9 @@ function OcrResultView({
 
 			const result = await ocrRecognize({
 				imageDataUrl,
-				engine: "windows",
-				lang: "zh-Hans",
+				engine,
+				lang,
+				apiConfigs: config.ocrApiConfigs,
 				onProgress: (stage) => {
 					if (stage === "recognizing") setBtnState("recognizing");
 				},

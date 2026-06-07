@@ -2,7 +2,7 @@ import { useCallback, useRef } from 'react';
 import type { AnalysisRecord, AnalysisResult, ImageSource, Tag, CropRect, ProviderConfig, ModeProfile, StylePreset } from '../types';
 import { analyzeImage } from '../api';
 import { generateId, saveImageToDisk } from '../utils/helpers';
-import { doCrop } from '../components/home/HomeHelpers';
+import { doCrop } from '../utils/homeHelpers';
 
 interface UseAnalysisProps {
   activeProviderConfig: ProviderConfig;
@@ -66,7 +66,7 @@ export function useAnalysis({ activeProviderConfig, quickSave, needApiKey, tags,
         summary: result.summary,
         systemTags: systemTagIds,
         userTags: [],
-        collectionIds: quickSave ? ['__inbox'] : ['__inbox'],
+        collectionIds: [],
         modeData: result.modeData,
         createdAt: now, updatedAt: now,
       };

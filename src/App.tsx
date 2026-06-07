@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { usePreferences } from "./hooks/usePreferences";
 import { getTheme, AppTheme } from "./styles/theme";
-import { WINDOW_RADIUS } from "./styles/styles";
+import { WINDOW_RADIUS } from "./styles/layoutConstants";
 import { ToastProvider } from "./components/common/Toast";
 import Sidebar from "./components/layout/Sidebar";
 import TitleBar from "./components/layout/TitleBar";

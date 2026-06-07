@@ -2,7 +2,7 @@ import { useRef, useCallback, useEffect } from "react";
 import { Gear, House, Clock, Folders, Scan, Info } from "@phosphor-icons/react";
 import Tooltip from "../common/Tooltip";
 import type { AppTheme } from "../../styles/theme";
-import { SIDEBAR_ITEM_SIZE, SIDEBAR_ICON_SIZE } from "../../styles/styles";
+import { SIDEBAR_ITEM_SIZE, SIDEBAR_ICON_SIZE } from "../../styles/layoutConstants";
 import { getT } from "../../utils/i18n";
 
 const MIN_SIDEBAR_WIDTH = 140;
@@ -115,7 +115,12 @@ const Sidebar = ({
 		const IconComp = NAV_ITEMS.find((n) => n.id === id)?.icon;
 		if (!IconComp) return null;
 		const btn = (
-			<button onClick={() => onNavigate(id)} style={navBtnStyle(active)}>
+			<button
+				key={id}
+				onClick={() => onNavigate(id)}
+				className={`nav-item${active ? " nav-item-active" : ""}`}
+				style={navBtnStyle(active)}
+			>
 				{active && !collapsed && <div style={activeIndicator} />}
 				<IconComp
 					size={SIDEBAR_ICON_SIZE}
@@ -124,14 +129,11 @@ const Sidebar = ({
 				{!collapsed && <span>{label}</span>}
 			</button>
 		);
-		if (collapsed) {
-			return (
-				<Tooltip key={id} content={label} accentColor={colors.accent}>
-					{btn}
-				</Tooltip>
-			);
-		}
-		return <span key={id}>{btn}</span>;
+		return (
+			<Tooltip key={id} content={label} accentColor={colors.accent}>
+				{btn}
+			</Tooltip>
+		);
 	};
 
 	return (
@@ -175,38 +177,28 @@ const Sidebar = ({
 					gap: 2,
 				}}
 			>
-				{(collapsed ? (
-					<Tooltip key={colors.accent} content={t.aboutTab || "About"} accentColor={colors.accent}>
-						<button
-							onClick={onOpenAbout}
-							style={navBtnStyle(false)}
-						>
-							<Info size={SIDEBAR_ICON_SIZE} weight="bold" />
-							{!collapsed && <span>{t.aboutTab || "About"}</span>}
-						</button>
-					</Tooltip>
-				) : (
-					<button
-						onClick={onOpenAbout}
-						style={navBtnStyle(false)}
-					>
-						<Info size={SIDEBAR_ICON_SIZE} weight="bold" />
-						{!collapsed && <span>{t.aboutTab || "About"}</span>}
-					</button>
-				))}
-				{(collapsed ? (
-					<Tooltip key={colors.accent} content={t.settings} accentColor={colors.accent}>
-						<button onClick={onOpenSettings} style={navBtnStyle(false)}>
-							<Gear size={SIDEBAR_ICON_SIZE} weight="bold" />
-							{!collapsed && <span>{t.settings}</span>}
-						</button>
-					</Tooltip>
-				) : (
-					<button onClick={onOpenSettings} style={navBtnStyle(false)}>
-						<Gear size={SIDEBAR_ICON_SIZE} weight="bold" />
-						{!collapsed && <span>{t.settings}</span>}
-					</button>
-				))}
+				<Tooltip content={t.aboutTab || "About"} accentColor={colors.accent}>
+				<button
+					key="about"
+					onClick={onOpenAbout}
+					className="nav-item"
+					style={navBtnStyle(false)}
+				>
+					<Info size={SIDEBAR_ICON_SIZE} weight="bold" />
+					{!collapsed && <span>{t.aboutTab || "About"}</span>}
+				</button>
+			</Tooltip>
+			<Tooltip content={t.settings} accentColor={colors.accent}>
+				<button
+					key="settings"
+					onClick={onOpenSettings}
+					className="nav-item"
+					style={navBtnStyle(false)}
+				>
+					<Gear size={SIDEBAR_ICON_SIZE} weight="bold" />
+					{!collapsed && <span>{t.settings}</span>}
+				</button>
+			</Tooltip>
 			</div>
 
 			{/* Resize handle */}

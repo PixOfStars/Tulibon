@@ -1,6 +1,6 @@
 import { List, Minus, Square, X } from "@phosphor-icons/react";
 import type { AppTheme } from "../../styles/theme";
-import { TITLE_BAR_HEIGHT, SIDEBAR_TOGGLE_SIZE } from "../../styles/styles";
+import { TITLE_BAR_HEIGHT, SIDEBAR_TOGGLE_SIZE } from "../../styles/layoutConstants";
 import { tauriInvoke } from "../../utils/tauri";
 import { getT } from "../../utils/i18n";
 import Tooltip from "../common/Tooltip";

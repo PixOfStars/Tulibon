@@ -32,11 +32,13 @@ export { DEFAULT_MODE_PROFILES, DEFAULT_STYLE_PRESETS } from "./config";
 
 export type {
 	OCREngine,
+	OcrApiConfigs,
 } from "./ocr";
 
 export {
 	OCR_ENGINES,
 	DEFAULT_OCR_ENGINE,
+	DEFAULT_OCR_API_CONFIGS,
 } from "./ocr";
 
 export type {

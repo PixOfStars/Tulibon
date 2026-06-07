@@ -4,6 +4,7 @@
 
 import type { AnalysisMode } from "./models";
 import type { LocalizedText } from "./models";
+import type { OCREngine, OcrApiConfigs } from "./ocr";
 
 export type ProviderType = "gemini" | "openai" | "custom";
 
@@ -107,4 +108,6 @@ export interface AppConfig {
 	quickSave: boolean;
 	sidebarWidth: number;
 	sidebarOrder: string[];
+	ocrEngine: OCREngine;
+	ocrApiConfigs: OcrApiConfigs;
 }

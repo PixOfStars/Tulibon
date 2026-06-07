@@ -1,4 +1,4 @@
-import type { CropRect } from '../../types';
+import type { CropRect } from '../types';
 
 export function doCrop(dataUrl: string, rect: CropRect): Promise<string> {
   return new Promise((resolve) => {

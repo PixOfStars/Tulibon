@@ -95,6 +95,7 @@ const OcrPage = ({ theme, lang, config }: OcrPageProps) => {
 						imageDataUrl={ocrImage}
 						colors={colors}
 						t={t}
+						config={config}
 					/>
 				)}
 			</div>

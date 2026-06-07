@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Scissors, X } from '@phosphor-icons/react';
 import type { CropRect } from '../../types';
-import { smallBtnStyle } from './HomeHelpers';
+import { smallBtnStyle } from '../../utils/homeHelpers';
 import { getT } from '../../utils/i18n';
 
 interface CropPanelProps {

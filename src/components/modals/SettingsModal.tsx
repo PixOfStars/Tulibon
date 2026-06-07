@@ -6,18 +6,22 @@ import {
 	Wrench,
 	Palette,
 	Sliders,
+	Scan,
 	X,
 } from "@phosphor-icons/react";
 import type { ProviderConfig, AppConfig } from "../../types";
 import type { AppTheme } from "../../styles/theme";
 import { useToast } from "../common/Toast";
-import { SETTINGS_MODAL_WIDTH } from "../../styles/styles";
+import { SETTINGS_MODAL_WIDTH } from "../../styles/layoutConstants";
 import { tauriInvoke } from "../../utils/tauri";
+import { sectionTitle } from '../../styles/components';
+import { flexBetween, scrollContainer } from '../../styles/layout';
 import ProviderTab from "../settings/ProviderTab";
 import InputTab from "../settings/InputTab";
 import GeneralTab from "../settings/GeneralTab";
 import AppearanceTab from "../settings/AppearanceTab";
 import ModeStyleTab from "../settings/ModeStyleTab";
+import OcrTab from "../settings/OcrTab";
 import { getT } from "../../utils/i18n";
 import type zh from "../../locales/zh.json";
 
@@ -32,7 +36,8 @@ type Tab =
 	| "modeStyle"
 	| "input"
 	| "general"
-	| "appearance";
+	| "appearance"
+	| "ocr";
 
 const tabItems: { key: Tab; icon: typeof Key; i18nKey: keyof typeof zh }[] = [
 	{ key: "provider", icon: Key, i18nKey: "aiProviderTab" },
@@ -40,6 +45,7 @@ const tabItems: { key: Tab; icon: typeof Key; i18nKey: keyof typeof zh }[] = [
 	{ key: "input", icon: ImageSquare, i18nKey: "inputTab" },
 	{ key: "general", icon: Wrench, i18nKey: "generalTab" },
 	{ key: "appearance", icon: Palette, i18nKey: "appearanceTab" },
+	{ key: "ocr", icon: Scan, i18nKey: "ocrEngineTab" },
 ];
 
 const SettingsModal = ({ prefs, theme, onClose }: SettingsModalProps) => {
@@ -110,16 +116,12 @@ const SettingsModal = ({ prefs, theme, onClose }: SettingsModalProps) => {
 				{/* Header */}
 				<div
 					style={{
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "space-between",
+						...flexBetween,
 						padding: "14px 20px",
 						borderBottom: `1px solid ${colors.border}`,
 					}}
 				>
-					<span
-						style={{ fontSize: 14, fontWeight: 700, color: colors.textHeader }}
-					>
+					<span style={{ ...sectionTitle(colors) }}>
 						{t.settings}
 					</span>
 					<button
@@ -190,7 +192,7 @@ const SettingsModal = ({ prefs, theme, onClose }: SettingsModalProps) => {
 					</div>
 
 					{/* Right content */}
-					<div style={{ flex: 1, overflow: "auto", padding: "20px 20px 20px" }}>
+					<div style={{ ...scrollContainer, padding: "20px 20px 20px" }}>
 						{activeTab === "provider" && (
 							<ProviderTab
 								{...tabProps}
@@ -226,6 +228,7 @@ const SettingsModal = ({ prefs, theme, onClose }: SettingsModalProps) => {
 							<GeneralTab {...tabProps} onSelectFolder={handleSelectFolder} />
 						)}
 						{activeTab === "appearance" && <AppearanceTab {...tabProps} />}
+						{activeTab === "ocr" && <OcrTab {...tabProps} />}
 
 					</div>
 				</div>

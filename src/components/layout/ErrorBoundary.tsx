@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import type { ReactNode } from 'react';
-import { WINDOW_RADIUS } from '../../styles/styles';
+import { WINDOW_RADIUS } from '../../styles/layoutConstants';
 import zh from '../../locales/zh.json';
 import en from '../../locales/en.json';
 

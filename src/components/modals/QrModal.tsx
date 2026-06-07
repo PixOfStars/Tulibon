@@ -1,4 +1,5 @@
 import { X, QrCode } from '@phosphor-icons/react';
+import { card, sectionTitle } from '../../styles/components';
 
 interface QrModalProps {
   colors: Record<string, string>;
@@ -9,14 +10,11 @@ interface QrModalProps {
 const QrModal = ({ colors, t, onClose }: QrModalProps) => (
   <div className="settings-overlay" style={{ zIndex: 210 }} onClick={onClose}>
     <div onClick={e => e.stopPropagation()} style={{
-      backgroundColor: colors.bg,
-      borderRadius: 16,
-      padding: 28,
+      ...card(colors as any, { padding: 28 }),
       maxWidth: 340,
       width: '90%',
       textAlign: 'center',
       boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
-      border: `1px solid ${colors.border}`,
       position: 'relative',
     }}>
       {/* Close button */}
@@ -33,7 +31,7 @@ const QrModal = ({ colors, t, onClose }: QrModalProps) => (
 
       <QrCode size={28} weight="bold" color={colors.accent} style={{ marginBottom: 12 }} />
 
-      <div style={{ fontSize: 14, fontWeight: 700, color: colors.textHeader, marginBottom: 16 }}>
+      <div style={{ ...sectionTitle(colors as any), marginBottom: 16 }}>
         {t.aboutOAName}
       </div>
 

@@ -62,7 +62,6 @@ export interface Collection {
 }
 
 export const DEFAULT_COLLECTIONS: Omit<Collection, 'createdAt' | 'updatedAt'>[] = [
-  { id: '__inbox',     name: { zh: '收件箱',  en: 'Inbox' },     icon: 'Tray',   color: '#6B7280' },
   { id: '__favorites', name: { zh: '收藏',    en: 'Favorites' },  icon: 'Heart',  color: '#FF3B30' },
 ];
 

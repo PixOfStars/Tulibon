@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface TooltipProps {
     content: string;
@@ -8,17 +8,29 @@ interface TooltipProps {
 
 const Tooltip = ({ content, children, accentColor = "#00C896" }: TooltipProps) => {
     const [visible, setVisible] = useState(false);
-    const [pos, setPos] = useState({ x: 0, y: 0 });
+    const [pos, setPos] = useState<{ x: number; y: number; side: "left" | "right" }>({ x: 0, y: 0, side: "right" });
     const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
     const wrapperRef = useRef<HTMLSpanElement>(null);
+    const tooltipRef = useRef<HTMLDivElement>(null);
+
+    const calcPos = () => {
+        const rect = wrapperRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const vw = window.innerWidth;
+        // 预估 tooltip 宽度（内容长度 × 字符宽度 + padding）
+        const estimatedW = content.length * 12 + 20;
+        const gap = 12;
+        // 右侧空间不足时翻转到左侧
+        if (rect.right + gap + estimatedW > vw - 8) {
+            setPos({ x: rect.left - gap, y: rect.top + rect.height / 2, side: "left" });
+        } else {
+            setPos({ x: rect.right + gap, y: rect.top + rect.height / 2, side: "right" });
+        }
+    };
 
     const handleMouseEnter = () => {
         clearTimeout(timeoutRef.current);
-        const rect = wrapperRef.current?.getBoundingClientRect();
-        if (rect) {
-            // 原本是 rect.right + 8，这里稍微加大一点(12)，给左侧的尖角留出空间
-            setPos({ x: rect.right + 12, y: rect.top + rect.height / 2 });
-        }
+        calcPos();
         timeoutRef.current = setTimeout(() => setVisible(true), 400);
     };
 
@@ -26,6 +38,19 @@ const Tooltip = ({ content, children, accentColor = "#00C896" }: TooltipProps) =
         clearTimeout(timeoutRef.current);
         setVisible(false);
     };
+
+    // 显示后用实际宽度修正位置
+    useEffect(() => {
+        if (!visible || !tooltipRef.current) return;
+        const tw = tooltipRef.current.offsetWidth;
+        const rect = wrapperRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const vw = window.innerWidth;
+        const gap = 12;
+        if (pos.side === "right" && rect.right + gap + tw > vw - 8) {
+            setPos({ x: rect.left - gap, y: rect.top + rect.height / 2, side: "left" });
+        }
+    }, [visible]);
 
     return (
         <span
@@ -37,11 +62,12 @@ const Tooltip = ({ content, children, accentColor = "#00C896" }: TooltipProps) =
             {children}
             {visible && content && (
                 <div
+                    ref={tooltipRef}
                     style={{
                         position: "fixed",
                         left: pos.x,
                         top: pos.y,
-                        transform: "translateY(-50%)",
+                        transform: pos.side === "right" ? "translateY(-50%)" : "translate(-100%, -50%)",
                         zIndex: 9999,
                         padding: "6px 10px",
                         borderRadius: 6,
@@ -51,25 +77,23 @@ const Tooltip = ({ content, children, accentColor = "#00C896" }: TooltipProps) =
                         fontWeight: 600,
                         whiteSpace: "nowrap",
                         pointerEvents: "none",
-                        // 【关键优化 1】使用 drop-shadow 替代 box-shadow，这样阴影会沿着尖角的边缘生成
-                        filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.25))", 
+                        filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.25))",
                     }}
                 >
-                    {/* 【关键优化 2】左侧的尖角 */}
+                    {/* 尖角：右侧显示时在左侧，左侧显示时在右侧 */}
                     <div
                         style={{
                             position: "absolute",
-                            left: -4, // 向左移出盒子外，露出一半
-                            top: "50%", // 垂直居中
-                            transform: "translateY(-50%) rotate(45deg)", // 旋转 45 度形成尖角
+                            [pos.side === "right" ? "left" : "right"]: -4,
+                            top: "50%",
+                            transform: "translateY(-50%) rotate(45deg)",
                             width: 8,
                             height: 8,
-                            backgroundColor: accentColor, // 颜色与主体保持一致
-                            borderRadius: 1, // 让尖角稍微圆润一点，不那么刺眼
-                            zIndex: -1, // 压在文字内容的下面
+                            backgroundColor: accentColor,
+                            borderRadius: 1,
+                            zIndex: -1,
                         }}
                     />
-                    
                     {content}
                 </div>
             )}
