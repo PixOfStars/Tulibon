@@ -13,17 +13,26 @@ plugins/*.zip
 plugins/*/index.js
 plugins/*/settings.js
 
+# ── Docs (local only) ──
 CLAUDE.md
+REQUIREMENTS.md
+CHANGELOG.md
 .githooks/
 *.md
-tsconfig.app.tsbuildinfo
 
+# ── Vite cache ──
+.vite/
 
-# ── Auto-generated (rebuild on tauri build) ──
+# ── Tauri generated ──
 src-tauri/gen/
-
-# ── Build artifacts ──
+tsconfig.app.tsbuildinfo
 tsconfig.node.tsbuildinfo
+
+# ── Auto-generated release metadata ──
+latest.json
+
+# ── Scripts (local only) ──
+scripts/
 
 # ── Platform-specific icons (Windows-only app) ──
 src-tauri/icons/android/
