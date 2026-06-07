@@ -15,6 +15,7 @@ plugins/*/settings.js
 
 CLAUDE.md
 .githooks/
+*.md
 tsconfig.app.tsbuildinfo
 
 
