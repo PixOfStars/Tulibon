@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import type { CropRect } from '../../types';
+import type { CropRect } from '../types';
 
 export function useCropHandlers() {
   const [cropRect, setCropRect] = useState<CropRect | null>(null);

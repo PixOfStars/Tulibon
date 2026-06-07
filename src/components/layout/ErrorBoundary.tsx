@@ -1,6 +1,8 @@
 import { Component } from 'react';
 import type { ReactNode } from 'react';
-import { WINDOW_RADIUS } from '../styles';
+import { WINDOW_RADIUS } from '../../styles/styles';
+import zh from '../../locales/zh.json';
+import en from '../../locales/en.json';
 
 interface Props {
   children: ReactNode;
@@ -10,6 +12,16 @@ interface State {
   hasError: boolean;
   error: Error | null;
 }
+
+const getLang = (): 'zh' | 'en' => {
+  if (typeof navigator !== 'undefined' && navigator.language?.startsWith('zh')) return 'zh';
+  return 'en';
+};
+
+const t = (key: string): string => {
+  const dict = getLang() === 'zh' ? zh : en;
+  return (dict as Record<string, string>)[key] || key;
+};
 
 export default class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
@@ -49,7 +61,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           padding: 24,
         }}>
           <div style={{ fontSize: 48, lineHeight: 1 }}>!</div>
-          <div style={{ fontSize: 16, fontWeight: 700 }}>应用遇到错误</div>
+          <div style={{ fontSize: 16, fontWeight: 700 }}>{t('errorBoundaryTitle')}</div>
           <div style={{
             fontSize: 12,
             color: '#999',
@@ -57,7 +69,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             maxWidth: 420,
             lineHeight: 1.6,
           }}>
-            渲染过程中发生未预期的错误。请尝试重新加载应用。
+            {t('errorBoundaryHint')}
           </div>
           {this.state.error && (
             <div style={{
@@ -86,7 +98,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               cursor: 'pointer',
             }}
           >
-            重新加载
+            {t('errorBoundaryReload')}
           </button>
         </div>
       );

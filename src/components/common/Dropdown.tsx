@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { CaretDown, CaretUp } from '@phosphor-icons/react';
-import { inputStyle } from './settings/SettingsField';
+import { inputStyle } from '../settings/SettingsField';
 
 interface DropdownProps {
   options: { value: string; label: string }[];

@@ -1,19 +1,14 @@
 import { useState, useRef } from "react";
 import { Copy, CheckCircle, Scan, Spinner } from "@phosphor-icons/react";
-import type { OCREngine } from "../../types";
 import {
 	recognize as ocrRecognize,
 	checkEngine,
-	getFallbackEngine,
 } from "../../api/ocrManager";
 
 interface OcrResultViewProps {
 	imageDataUrl: string;
 	colors: Record<string, string>;
 	t: Record<string, string>;
-	engine?: OCREngine;
-	engineDownloaded?: Record<OCREngine, boolean>;
-	onEngineFallback?: (fallbackTo: OCREngine) => void;
 }
 
 type ButtonState = "idle" | "initializing" | "recognizing" | "done" | "error";
@@ -22,9 +17,6 @@ function OcrResultView({
 	imageDataUrl,
 	colors,
 	t,
-	engine = "windows",
-	engineDownloaded = { windows: true, paddle: false, tesseract: false },
-	onEngineFallback,
 }: OcrResultViewProps) {
 	const [text, setText] = useState("");
 	const [error, setError] = useState("");
@@ -42,38 +34,17 @@ function OcrResultView({
 		setRan(false);
 
 		try {
-			// 1. Check engine readiness
-			const state = await checkEngine({ engine, engineDownloaded });
+			const state = await checkEngine({ engine: "windows" });
 
 			if (state.status === "error") {
-				// Handle download-needed error
-				if (state.error?.startsWith("need_download:")) {
-					throw new Error("need_download");
-				}
-				if (state.error?.startsWith("coming_soon:")) {
-					throw new Error(
-						t.ocrEngineComingSoon || "Coming Soon",
-					);
-				}
-				// Handle fallback: Windows OCR not available
-				if (state.error?.includes("不支持")) {
-					const fallback = getFallbackEngine(engine, engineDownloaded);
-					onEngineFallback?.(fallback);
-					throw new Error(
-						t.ocrEngineFallback ||
-							"Windows OCR not available, switched to Tesseract",
-					);
-				}
 				throw new Error(state.error || "Engine check failed");
 			}
 
-			// 2. Recognize
 			setBtnState("recognizing");
 
 			const result = await ocrRecognize({
 				imageDataUrl,
-				engine,
-				engineDownloaded,
+				engine: "windows",
 				lang: "zh-Hans",
 				onProgress: (stage) => {
 					if (stage === "recognizing") setBtnState("recognizing");
@@ -102,7 +73,7 @@ function OcrResultView({
 	const btnLabel = (): string => {
 		switch (btnState) {
 			case "initializing":
-				return t.ocrEngineInitEngine || "Initializing engine...";
+				return t.ocrEngineInitEngine;
 			case "recognizing":
 				return t.ocrRecognizing;
 			default:
@@ -283,18 +254,6 @@ function OcrResultView({
 					{t.ocrHint}
 				</div>
 			)}
-
-			{/* Engine indicator */}
-			<div
-				style={{
-					textAlign: "center",
-					fontSize: 10,
-					color: colors.text,
-					opacity: 0.3,
-				}}
-			>
-				{engine.toUpperCase()}
-			</div>
 		</div>
 	);
 }

@@ -1,5 +1,5 @@
 import type { AppConfig } from '../../types';
-import type { useToast } from '../Toast';
+import type { useToast } from '../common/Toast';
 
 export interface TabProps {
   config: AppConfig;

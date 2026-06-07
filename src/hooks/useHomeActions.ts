@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
-import type { AnalysisRecord, Collection } from '../../types';
-import { exportAsTxt, exportAsMarkdown } from '../../utils/helpers';
-import { tauriInvoke } from '../../utils/tauri';
-import type { useToast } from '../Toast';
+import type { AnalysisRecord, Collection } from '../types';
+import { exportAsTxt, exportAsMarkdown } from '../utils/helpers';
+import { tauriInvoke } from '../utils/tauri';
+import type { useToast } from '../components/common/Toast';
 
 interface UseHomeActionsProps {
   records: AnalysisRecord[];

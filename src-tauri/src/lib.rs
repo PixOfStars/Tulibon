@@ -1,20 +1,15 @@
 mod app_paths;
 mod config_crypto;
-mod download;
+mod data;
+mod error;
+mod image;
 mod ocr;
+mod window;
 
-use arboard::Clipboard;
-use base64::Engine;
 use config_crypto::{decrypt_config_keys, encrypt_config_keys};
-use image::{ImageBuffer, ImageFormat, Rgba};
-
 use std::fs;
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicBool, Ordering};
-use tauri::menu::{MenuBuilder, MenuItemBuilder};
-use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::DragDropEvent;
-use tauri::{Emitter, Manager};
+use tauri::Emitter;
 use tauri_plugin_store::StoreExt;
 
 // ── Path helpers ──
@@ -44,6 +39,10 @@ fn get_config_path(app: &tauri::AppHandle) -> PathBuf {
     app_data_dir(app).join("data").join("config.json")
 }
 
+fn get_images_dir(app: &tauri::AppHandle) -> PathBuf {
+    get_data_dir(app).join("data").join("images")
+}
+
 fn get_history_path(app: &tauri::AppHandle) -> PathBuf {
     get_data_dir(app).join("data").join("history.json")
 }
@@ -56,11 +55,7 @@ fn get_tags_path(app: &tauri::AppHandle) -> PathBuf {
     get_data_dir(app).join("data").join("tags.json")
 }
 
-fn get_images_dir(app: &tauri::AppHandle) -> PathBuf {
-    get_data_dir(app).join("data").join("images")
-}
-
-fn copy_dir_recursive(src: &std::path::Path, dest: &std::path::Path) -> Result<(), String> {
+fn copy_dir_recursive(src: &PathBuf, dest: &PathBuf) -> Result<(), String> {
     fs::create_dir_all(dest).map_err(|e| e.to_string())?;
     for entry in fs::read_dir(src).map_err(|e| e.to_string())? {
         let entry = entry.map_err(|e| e.to_string())?;
@@ -75,7 +70,7 @@ fn copy_dir_recursive(src: &std::path::Path, dest: &std::path::Path) -> Result<(
     Ok(())
 }
 
-fn move_path_if_missing(src: &std::path::Path, dest: &std::path::Path) -> Result<(), String> {
+fn move_path_if_missing(src: &PathBuf, dest: &PathBuf) -> Result<(), String> {
     if !src.exists() || dest.exists() {
         return Ok(());
     }
@@ -99,38 +94,61 @@ fn migrate_legacy_app_data(app: &tauri::AppHandle) -> Result<(), String> {
     let Some(legacy) = app_paths::legacy_app_data_dir(app) else {
         return Ok(());
     };
-
     if legacy == base || !legacy.exists() {
         return Ok(());
     }
-
     move_path_if_missing(&legacy.join("data"), &base.join("data"))?;
-    move_path_if_missing(&legacy.join("plugins"), &base.join("plugins"))?;
     move_path_if_missing(&legacy.join("cache"), &base.join("cache"))?;
-
-    // Older builds stored JSON files directly under app_data; preserve them too.
-    move_path_if_missing(
-        &legacy.join("config.json"),
-        &base.join("data").join("config.json"),
-    )?;
-    move_path_if_missing(
-        &legacy.join("history.json"),
-        &base.join("data").join("history.json"),
-    )?;
-    move_path_if_missing(
-        &legacy.join("collections.json"),
-        &base.join("data").join("collections.json"),
-    )?;
-    move_path_if_missing(
-        &legacy.join("tags.json"),
-        &base.join("data").join("tags.json"),
-    )?;
+    move_path_if_missing(&legacy.join("config.json"), &base.join("data").join("config.json"))?;
+    move_path_if_missing(&legacy.join("history.json"), &base.join("data").join("history.json"))?;
+    move_path_if_missing(&legacy.join("collections.json"), &base.join("data").join("collections.json"))?;
+    move_path_if_missing(&legacy.join("tags.json"), &base.join("data").join("tags.json"))?;
     move_path_if_missing(&legacy.join("images"), &base.join("data").join("images"))?;
-
     Ok(())
 }
 
-// ── Commands ──
+// ── Commands (data) ──
+
+#[tauri::command]
+fn load_history(app: tauri::AppHandle) -> Result<String, String> {
+    data::load_records(&get_history_path(&app))
+}
+
+#[tauri::command]
+fn save_history(app: tauri::AppHandle, records: String) -> Result<(), String> {
+    data::save_records(&get_history_path(&app), &records)
+}
+
+#[tauri::command]
+fn delete_record_by_id(app: tauri::AppHandle, record_id: String) -> Result<(), String> {
+    let paths = data::delete_record(&get_history_path(&app), &record_id)?;
+    for path in paths {
+        let _ = image::delete_image(&get_images_dir(&app), &path);
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn load_collections(app: tauri::AppHandle) -> Result<String, String> {
+    data::load_collections(&get_collections_path(&app))
+}
+
+#[tauri::command]
+fn save_collections(app: tauri::AppHandle, collections: String) -> Result<(), String> {
+    data::save_collections(&get_collections_path(&app), &collections)
+}
+
+#[tauri::command]
+fn load_tags(app: tauri::AppHandle) -> Result<String, String> {
+    data::load_tags(&get_tags_path(&app))
+}
+
+#[tauri::command]
+fn save_tags(app: tauri::AppHandle, tags: String) -> Result<(), String> {
+    data::save_tags(&get_tags_path(&app), &tags)
+}
+
+// ── Commands (config) ──
 
 #[tauri::command]
 fn save_config(app: tauri::AppHandle, config: String) -> Result<(), String> {
@@ -138,13 +156,11 @@ fn save_config(app: tauri::AppHandle, config: String) -> Result<(), String> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     }
-    // Ensure file exists for the store plugin to load
     if !path.exists() {
         fs::write(&path, "{}").map_err(|e| e.to_string())?;
     }
     let encrypted = encrypt_config_keys(&config)?;
     let store = app.store(path).map_err(|e| e.to_string())?;
-    // Clear legacy top-level keys when migrating from old raw-JSON format
     for k in store.keys().clone() {
         if k != "config" {
             store.delete(&k);
@@ -161,404 +177,109 @@ fn load_config(app: tauri::AppHandle) -> Result<String, String> {
         return Ok("{}".to_string());
     }
     let store = app.store(path.clone()).map_err(|e| e.to_string())?;
-
-    // Try new store format first
     if let Some(value) = store.get("config") {
         if let Some(s) = value.as_str() {
             return decrypt_config_keys(s);
         }
     }
-
-    // Migration: old format — config.json is a raw JSON file without "config" key
     let raw = fs::read_to_string(&path).map_err(|e| e.to_string())?;
     let decrypted = decrypt_config_keys(&raw)?;
     let encrypted = encrypt_config_keys(&decrypted)?;
-
-    // Migrate to store format
     for k in store.keys().clone() {
         store.delete(&k);
     }
     store.set("config", serde_json::Value::String(encrypted));
     let _ = store.save();
-
     Ok(decrypted)
 }
 
-#[tauri::command]
-fn save_history(app: tauri::AppHandle, records: String) -> Result<(), String> {
-    let path = get_history_path(&app);
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-    }
-    fs::write(&path, &records).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-fn load_history(app: tauri::AppHandle) -> Result<String, String> {
-    let path = get_history_path(&app);
-    if path.exists() {
-        fs::read_to_string(&path).map_err(|e| e.to_string())
-    } else {
-        Ok("[]".to_string())
-    }
-}
+// ── Commands (image) ──
 
 #[tauri::command]
 fn save_image(app: tauri::AppHandle, id: String, base64_data: String) -> Result<String, String> {
     let images_dir = get_images_dir(&app);
-    fs::create_dir_all(&images_dir).map_err(|e| e.to_string())?;
-
-    let data = if let Some(comma_pos) = base64_data.find(',') {
-        &base64_data[comma_pos + 1..]
-    } else {
-        &base64_data
-    };
-
-    let bytes = base64::engine::general_purpose::STANDARD
-        .decode(data)
-        .map_err(|e| e.to_string())?;
-
-    // Decode to image, then save as lossless PNG (preserves quality for AI analysis).
-    // Trade-off: photographic content may be ~2-4× larger than JPEG at equivalent quality,
-    // but this avoids generational loss and ensures analysis accuracy.
-    let img = image::load_from_memory(&bytes).map_err(|e| e.to_string())?;
-    let filename = format!("{}.png", id);
-    let filepath = images_dir.join(&filename);
-
-    let mut png_bytes: Vec<u8> = Vec::new();
-    img.write_to(&mut std::io::Cursor::new(&mut png_bytes), ImageFormat::Png)
-        .map_err(|e| e.to_string())?;
-    fs::write(&filepath, &png_bytes).map_err(|e| e.to_string())?;
-
-    Ok(filepath.to_string_lossy().to_string())
+    image::save_image(&images_dir, &id, &base64_data)
 }
 
 #[tauri::command]
 fn delete_image(app: tauri::AppHandle, path: String) -> Result<(), String> {
-    let filepath = PathBuf::from(&path);
     let images_dir = get_images_dir(&app);
-    if !filepath.starts_with(&images_dir) {
-        return Err("Invalid image path".to_string());
-    }
-    if filepath.exists() {
-        fs::remove_file(&filepath).map_err(|e| e.to_string())
-    } else {
-        Ok(())
-    }
+    image::delete_image(&images_dir, &path)
 }
 
 #[tauri::command]
 fn load_image(app: tauri::AppHandle, path: String) -> Result<String, String> {
-    let filepath = PathBuf::from(&path);
     let images_dir = get_images_dir(&app);
+    let filepath = std::path::PathBuf::from(&path);
     if !filepath.starts_with(&images_dir) {
-        return Err(format!(
-            "图片路径不在允许范围内: {} (必须在 {} 目录下)",
-            filepath.display(),
-            images_dir.display()
-        ));
+        return Err(format!("图片路径不在允许范围内: {} (必须在 {} 目录下)", filepath.display(), images_dir.display()));
     }
-    if filepath.exists() {
-        let bytes = fs::read(&filepath).map_err(|e| e.to_string())?;
-        let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
-        let ext = path.rsplit('.').next().unwrap_or("webp");
-        let mime = match ext {
-            "webp" => "image/webp",
-            "png" => "image/png",
-            "jpg" | "jpeg" => "image/jpeg",
-            _ => "image/png",
-        };
-        Ok(format!("data:{};base64,{}", mime, b64))
-    } else {
-        Err(format!(
-            "图片文件不存在: {}",
-            filepath.display()
-        ))
-    }
-}
-
-#[tauri::command]
-fn delete_record_by_id(app: tauri::AppHandle, record_id: String) -> Result<(), String> {
-    let path = get_history_path(&app);
-    if !path.exists() {
-        return Ok(());
-    }
-    let raw = fs::read_to_string(&path).map_err(|e| e.to_string())?;
-    let mut records: Vec<serde_json::Value> =
-        serde_json::from_str(&raw).map_err(|e| e.to_string())?;
-
-    // Clean up associated image file before removing the record
-    if let Some(target) = records
-        .iter()
-        .find(|r| r.get("id").and_then(|v| v.as_str()) == Some(&record_id))
-    {
-        if let Some(image_path) = target.get("imagePath").and_then(|v| v.as_str()) {
-            if !image_path.starts_with("data:") {
-                let filepath = PathBuf::from(image_path);
-                if filepath.exists() {
-                    let _ = fs::remove_file(&filepath);
-                }
-            }
-        }
-    }
-
-    records.retain(|r| r.get("id").and_then(|v| v.as_str()) != Some(&record_id));
-
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-    }
-    fs::write(&path, serde_json::to_string_pretty(&records).unwrap_or_default())
-        .map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-fn save_collections(app: tauri::AppHandle, collections: String) -> Result<(), String> {
-    let path = get_collections_path(&app);
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-    }
-    fs::write(&path, &collections).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-fn load_collections(app: tauri::AppHandle) -> Result<String, String> {
-    let path = get_collections_path(&app);
-    if path.exists() {
-        fs::read_to_string(&path).map_err(|e| e.to_string())
-    } else {
-        Ok("[]".to_string())
-    }
-}
-
-#[tauri::command]
-fn save_tags(app: tauri::AppHandle, tags: String) -> Result<(), String> {
-    let path = get_tags_path(&app);
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-    }
-    fs::write(&path, &tags).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-fn load_tags(app: tauri::AppHandle) -> Result<String, String> {
-    let path = get_tags_path(&app);
-    if path.exists() {
-        fs::read_to_string(&path).map_err(|e| e.to_string())
-    } else {
-        Ok("[]".to_string())
-    }
+    image::load_image(&path)
 }
 
 #[tauri::command]
 fn read_clipboard_image() -> Result<String, String> {
-    let mut clipboard = Clipboard::new().map_err(|e| e.to_string())?;
-    let img = clipboard.get_image().map_err(|e| e.to_string())?;
-    let width = img.width as u32;
-    let height = img.height as u32;
-    let mut rgba: Vec<u8> = Vec::with_capacity(img.bytes.len());
-    for chunk in img.bytes.chunks(4) {
-        if chunk.len() != 4 {
-            return Err("Invalid clipboard image data".to_string());
-        }
-        rgba.extend_from_slice(&[chunk[2], chunk[1], chunk[0], chunk[3]]);
-    }
-    let img_buf = ImageBuffer::<Rgba<u8>, _>::from_raw(width, height, rgba)
-        .ok_or_else(|| "Failed to create image buffer".to_string())?;
-    let mut png_bytes: Vec<u8> = Vec::new();
-    img_buf
-        .write_to(
-            &mut std::io::Cursor::new(&mut png_bytes),
-            image::ImageFormat::Png,
-        )
-        .map_err(|e| e.to_string())?;
-    Ok(base64::engine::general_purpose::STANDARD.encode(&png_bytes))
+    image::read_clipboard_image()
 }
+
+
+
+// ── Command (migration) ──
 
 #[tauri::command]
 fn migrate_data(app: tauri::AppHandle, new_dir: String) -> Result<(), String> {
-    // Use the app's own data directory (exe-relative for portable mode) instead of
-    // Tauri's default system path, so migration works correctly in portable builds.
     let old_dir = app_data_dir(&app);
     let new_dir = PathBuf::from(&new_dir);
-
-    // Validate: must be absolute, must differ from current data dir
     if !new_dir.is_absolute() {
         return Err("Path must be absolute".to_string());
     }
     if new_dir == old_dir {
         return Err("New location is the same as current".to_string());
     }
-
     fs::create_dir_all(&new_dir).map_err(|e| e.to_string())?;
 
-    let old_history = old_dir.join("history.json");
-    let new_history = new_dir.join("history.json");
-    if old_history.exists() && !new_history.exists() {
-        let _ = fs::copy(&old_history, &new_history);
-    }
-
-    let old_images = old_dir.join("images");
-    let new_images = new_dir.join("images");
-    if old_images.exists() {
-        fs::create_dir_all(&new_images).map_err(|e| e.to_string())?;
-        if let Ok(entries) = fs::read_dir(&old_images) {
-            for entry in entries.flatten() {
-                let dest = new_images.join(entry.file_name());
-                let _ = fs::copy(entry.path(), dest);
-            }
-        }
-    }
-
-    // Migrate JSON data files
-    for filename in &["collections.json", "tags.json", "config.json"] {
-        let src = old_dir.join(filename);
+    let data_dir = get_data_dir(&app);
+    for filename in &["config.json", "tulibon.db"] {
+        let src = data_dir.join("data").join(filename);
         let dst = new_dir.join(filename);
         if src.exists() && !dst.exists() {
             let _ = fs::copy(&src, &dst);
         }
     }
-
-    Ok(())
-}
-
-#[tauri::command]
-fn minimize_window(app: tauri::AppHandle) -> Result<(), String> {
-    app.get_webview_window("main")
-        .ok_or_else(|| "window not found".to_string())?
-        .minimize()
-        .map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-fn toggle_maximize(app: tauri::AppHandle) -> Result<(), String> {
-    let window = app
-        .get_webview_window("main")
-        .ok_or_else(|| "window not found".to_string())?;
-    if window.is_maximized().unwrap_or(false) {
-        window.unmaximize().map_err(|e| e.to_string())
-    } else {
-        window.maximize().map_err(|e| e.to_string())
-    }
-}
-
-#[tauri::command]
-fn hide_window(app: tauri::AppHandle) -> Result<(), String> {
-    app.get_webview_window("main")
-        .ok_or_else(|| "window not found".to_string())?
-        .hide()
-        .map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-fn pick_folder(app: tauri::AppHandle) -> Result<Option<String>, String> {
-    use tauri_plugin_dialog::DialogExt;
-    let folder = app.dialog().file().blocking_pick_folder();
-    Ok(folder.map(|p| p.to_string()))
-}
-
-
-
-#[tauri::command]
-fn set_autostart(enabled: bool) -> Result<(), String> {
-    let exe = std::env::current_exe().map_err(|e| e.to_string())?;
-    let exe_str = exe.to_string_lossy().to_string();
-    let auto = auto_launch::AutoLaunchBuilder::new()
-        .set_app_name("Tulibon")
-        .set_app_path(&exe_str)
-        .build()
-        .map_err(|e| e.to_string())?;
-    if enabled {
-        auto.enable().map_err(|e| e.to_string())?;
-    } else {
-        auto.disable().map_err(|e| e.to_string())?;
+    let old_images = data_dir.join("data").join("images");
+    let new_images = new_dir.join("images");
+    if old_images.exists() {
+        fs::create_dir_all(&new_images).map_err(|e| e.to_string())?;
+        if let Ok(entries) = fs::read_dir(&old_images) {
+            for entry in entries.flatten() {
+                let _ = fs::copy(entry.path(), new_images.join(entry.file_name()));
+            }
+        }
     }
     Ok(())
 }
 
-// ── OCR & Download commands ──
+// ── OCR commands ──
 
 #[tauri::command]
-async fn run_windows_ocr(
-    _app: tauri::AppHandle,
-    image_base64: String,
-    lang: String,
-) -> Result<String, String> {
-    // 1. Decode base64
+async fn run_windows_ocr(_app: tauri::AppHandle, image_base64: String, lang: String) -> Result<String, String> {
     let data = if let Some(comma_pos) = image_base64.find(',') {
         &image_base64[comma_pos + 1..]
     } else {
         &image_base64
     };
-    let bytes = base64::engine::general_purpose::STANDARD
-        .decode(data)
+    let bytes = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, data)
         .map_err(|e| format!("Base64 解码失败: {}", e))?;
-
-    // 2. Run Windows OCR
-    let text = ocr::recognize(&bytes, &lang).await?;
-    Ok(text)
+    ocr::recognize(&bytes, &lang).await
 }
 
 #[tauri::command]
 async fn check_windows_ocr(app: tauri::AppHandle, lang: String) -> Result<ocr::OcrSupport, String> {
-    // Get system language info first
-    let _ = app; // 保留 app 参数以保持 Tauri 兼容
+    let _ = app;
     ocr::check_support(&lang)
 }
 
-#[tauri::command]
-async fn download_ocr_model(
-    app: tauri::AppHandle,
-    engine: String,
-    urls: Vec<String>,
-) -> Result<(), String> {
-    let cache_dir = app_data_dir(&app)
-        .join("cache")
-        .join("ocr_models")
-        .join(&engine);
-    download::write_log(
-        &app_data_dir(&app),
-        &format!("Starting download for {}", engine),
-    );
-
-    let app_handle = app.clone();
-    let on_progress = move |progress: download::DownloadProgress| {
-        let _ = app_handle.emit("ocr-download-progress", &progress);
-    };
-
-    download::download_and_extract(
-        &engine,
-        &urls,
-        &cache_dir,
-        None, // cancel flag (future use)
-        on_progress,
-    )
-    .await
-    .map_err(|e| {
-        download::write_log(&app_data_dir(&app), &format!("Download failed: {}", e));
-        e
-    })?;
-
-    download::write_log(
-        &app_data_dir(&app),
-        &format!("Download complete for {}", engine),
-    );
-    Ok(())
-}
-
-#[tauri::command]
-async fn check_ocr_model_downloaded(app: tauri::AppHandle, engine: String) -> Result<bool, String> {
-    let cache_dir = app_data_dir(&app)
-        .join("cache")
-        .join("ocr_models")
-        .join(&engine);
-    // Check if the cache directory contains files (model is downloaded)
-    if !cache_dir.exists() {
-        return Ok(false);
-    }
-    let entries = fs::read_dir(&cache_dir).map_err(|e| e.to_string())?;
-    let file_count = entries.filter_map(|e| e.ok()).count();
-    Ok(file_count > 0)
-}
+// ── App entry ──
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -570,29 +291,14 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
-            save_config,
-            load_config,
-            save_history,
-            load_history,
-            delete_record_by_id,
-            save_collections,
-            load_collections,
-            save_tags,
-            load_tags,
-            save_image,
-            load_image,
-            delete_image,
-            read_clipboard_image,
-            migrate_data,
-            set_autostart,
-            minimize_window,
-            toggle_maximize,
-            hide_window,
-            pick_folder,
-            run_windows_ocr,
-            check_windows_ocr,
-            download_ocr_model,
-            check_ocr_model_downloaded,
+            save_config, load_config,
+            save_history, load_history, delete_record_by_id,
+            save_collections, load_collections,
+            save_tags, load_tags,
+            save_image, load_image, delete_image, read_clipboard_image,
+            migrate_data, window::set_autostart,
+            window::minimize_window, window::toggle_maximize, window::hide_window, window::pick_folder,
+            run_windows_ocr, check_windows_ocr,
         ])
         .setup(|app| {
             let base = app_data_dir(app.handle());
@@ -603,20 +309,18 @@ pub fn run() {
             let _ = fs::create_dir_all(&data_subdir);
             let _ = fs::create_dir_all(base.join("cache"));
 
-
-            // Auto-migrate old config.json from root to data/ before any get_data_dir()
-            // call, so custom dataDir from config is picked up correctly (#18).
+            // Migrate old config.json location
             let old_config = base.join("config.json");
             let new_config = data_subdir.join("config.json");
             if old_config.exists() && !new_config.exists() {
                 let _ = fs::rename(&old_config, &new_config);
             }
 
-            // Now safe: get_data_dir can read migrated config
+            // Ensure data directory exists
             let _ = fs::create_dir_all(get_data_dir(app.handle()));
-            // Plugins are now user-installed from registry (no longer bundled)
 
             let data_dir = get_data_dir(app.handle());
+            // Migrate old JSON files to data/ subdirectory
             let old_hist = data_dir.join("history.json");
             let new_hist = data_dir.join("data").join("history.json");
             if old_hist.exists() && !new_hist.exists() {
@@ -638,146 +342,11 @@ pub fn run() {
                 let _ = fs::rename(&old_img, &new_img);
             }
 
-            if let Some(window) = app.get_webview_window("main") {
-                let icon_img =
-                    tauri::image::Image::from_bytes(include_bytes!("../icons/32x32.png"))
-                        .unwrap_or_else(|_| tauri::image::Image::new(&[], 1, 1));
-                let _ = window.set_icon(icon_img);
 
-                #[cfg(target_os = "windows")]
-                {
-                    extern "system" {
-                        fn DwmSetWindowAttribute(
-                            hwnd: *mut std::ffi::c_void,
-                            dwattribute: u32,
-                            pvattribute: *const std::ffi::c_void,
-                            cbattribute: u32,
-                        ) -> i32;
-                    }
-                    if let Ok(hwnd) = window.hwnd() {
-                        const DWMWA_BORDER_COLOR: u32 = 34;
-                        let color: u32 = 0x000F0F0F;
-                        unsafe {
-                            DwmSetWindowAttribute(
-                                hwnd.0,
-                                DWMWA_BORDER_COLOR,
-                                &color as *const _ as *const std::ffi::c_void,
-                                std::mem::size_of::<u32>() as u32,
-                            );
-                        }
-                    }
-                }
 
-                let w = window.clone();
-                let app_handle = app.handle().clone();
-                window.on_window_event(move |event| {
-                    if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                        api.prevent_close();
-                        let _ = w.hide();
-                    }
-                    if let tauri::WindowEvent::DragDrop(drag_event) = event {
-                        if let DragDropEvent::Drop { paths, .. } = drag_event {
-                            let mut data_urls: Vec<String> = Vec::new();
-                            for path in paths {
-                                if let Ok(bytes) = fs::read(path) {
-                                    let b64 =
-                                        base64::engine::general_purpose::STANDARD.encode(&bytes);
-                                    let ext = path
-                                        .extension()
-                                        .and_then(|e| e.to_str())
-                                        .unwrap_or("png")
-                                        .to_lowercase();
-                                    let mime = if ext == "jpg" || ext == "jpeg" {
-                                        "image/jpeg"
-                                    } else if ext == "webp" {
-                                        "image/webp"
-                                    } else if ext == "bmp" {
-                                        "image/bmp"
-                                    } else if ext == "gif" {
-                                        "image/gif"
-                                    } else {
-                                        "image/png"
-                                    };
-                                    data_urls.push(format!("data:{};base64,{}", mime, b64));
-                                }
-                            }
-                            if !data_urls.is_empty() {
-                                let _ = app_handle.emit("file-drop", &data_urls);
-                            }
-                        }
-                    }
-                });
-            }
-
-            // Tray menu
-            let show_item = MenuItemBuilder::with_id("show", "显示 / Show").build(app)?;
-            let quit_item = MenuItemBuilder::with_id("quit", "退出 / Quit").build(app)?;
-            let menu = MenuBuilder::new(app)
-                .item(&show_item)
-                .item(&quit_item)
-                .build()?;
-
-            let tray_icon = tauri::image::Image::from_bytes(include_bytes!("../icons/32x32.png"))
-                .unwrap_or_else(|_| tauri::image::Image::new(&[], 1, 1));
-
-            // ── Tray debounce lock: prevents show/hide race on rapid double-click ──
-            let tray_lock = std::sync::Arc::new(AtomicBool::new(false));
-
-            let _tray = TrayIconBuilder::new()
-                .icon(tray_icon)
-                .menu(&menu)
-                .tooltip("Tulibon")
-                .on_menu_event(|app, event| match event.id().as_ref() {
-                    "show" => {
-                        if let Some(w) = app.get_webview_window("main") {
-                            let _ = w.show();
-                            let _ = w.set_focus();
-                        }
-                    }
-                    "quit" => {
-                        app.exit(0);
-                    }
-                    _ => {}
-                })
-                .on_tray_icon_event(move |tray, event| {
-                    if let TrayIconEvent::Click {
-                        button,
-                        button_state,
-                        ..
-                    } = event
-                    {
-                        if button == MouseButton::Left && button_state == MouseButtonState::Up {
-                            // Debounce: ignore clicks while a previous operation is in progress
-                            if tray_lock.compare_exchange(
-                                false,
-                                true,
-                                Ordering::Acquire,
-                                Ordering::Relaxed,
-                            ).is_err()
-                            {
-                                return;
-                            }
-
-                            let app = tray.app_handle();
-                            if let Some(w) = app.get_webview_window("main") {
-                                if w.is_visible().unwrap_or(false) {
-                                    let _ = w.hide();
-                                } else {
-                                    let _ = w.show();
-                                    let _ = w.set_focus();
-                                }
-                            }
-
-                            // Release lock after a short guard period (300ms)
-                            let lock = tray_lock.clone();
-                            std::thread::spawn(move || {
-                                std::thread::sleep(std::time::Duration::from_millis(300));
-                                lock.store(false, Ordering::Release);
-                            });
-                        }
-                    }
-                })
-                .build(app)?;
+            // Window & tray setup
+            let _ = window::setup_window(app.handle());
+            let _ = window::setup_tray(app.handle());
 
             Ok(())
         })

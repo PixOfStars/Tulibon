@@ -1,12 +1,11 @@
-import { useState, useCallback } from "react";
-import type { AppTheme } from "../../theme";
-import type { OCREngine } from "../../types";
+import { useState } from "react";
+import type { AppTheme } from "../../styles/theme";
 import {
 	clipboardToDataUrl,
 	base64FromFile,
 	base64FromUrl,
 } from "../../utils/helpers";
-import { useToast } from "../Toast";
+import { useToast } from "../common/Toast";
 import { useCroppedImage } from "../../hooks/useCroppedImage";
 import OcrResultView from "../result/OcrResultView";
 import ImageDropZone from "./ImageDropZone";
@@ -25,28 +24,12 @@ const OcrPage = ({ theme, lang, config }: OcrPageProps) => {
 	const colors = theme.colors;
 	const toast = useToast();
 	const [ocrImage, setOcrImage] = useState<string | null>(null);
-	const [currentEngine, setCurrentEngine] = useState(
-		config.ocrEngine || "windows",
-	);
 
 	const crop = useCroppedImage({
 		colors,
 		lang,
 		onCropConfirm: (url) => setOcrImage(url),
 	});
-
-	const handleEngineFallback = useCallback(
-		(fallbackTo: OCREngine) => {
-			setCurrentEngine(fallbackTo);
-			toast.show(
-				t.ocrEngineFallback || "Switched to Tesseract",
-				"info",
-				undefined,
-				6000,
-			);
-		},
-		[t, toast],
-	);
 
 	const loadImage = (dataUrl: string) => {
 		crop.startCrop(dataUrl);
@@ -112,9 +95,6 @@ const OcrPage = ({ theme, lang, config }: OcrPageProps) => {
 						imageDataUrl={ocrImage}
 						colors={colors}
 						t={t}
-						engine={currentEngine}
-						engineDownloaded={config.ocrEngineDownloaded}
-						onEngineFallback={handleEngineFallback}
 					/>
 				)}
 			</div>

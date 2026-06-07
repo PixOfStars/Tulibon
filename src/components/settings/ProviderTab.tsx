@@ -3,6 +3,7 @@ import { Key, Lightning, RocketLaunch, Wrench, Eye, EyeSlash, Copy, Trash } from
 import type { ProviderConfig } from '../../types';
 import { Field, ToggleRow, inputStyle, iconBtnStyle } from './SettingsField';
 import type { TabProps } from './TabProps';
+import Tooltip from '../common/Tooltip';
 
 const PROVIDER_ICONS: Record<string, typeof Key> = {
   gemini: Lightning,
@@ -78,18 +79,24 @@ const ProviderTab = ({
             <input type={showKey ? 'text' : 'password'} value={config.providers[editingProvider].apiKey}
               onChange={(e) => updateSingleProvider('apiKey', e.target.value)} placeholder={t.apiKeyPlaceholder}
               style={{ ...inputStyle(colors), width: '100%', paddingRight: 34 }} />
-            <button onClick={() => setShowKey(!showKey)} title={showKey ? t.hideKey : t.showKey}
+            <Tooltip key={colors.accent} content={showKey ? t.hideKey : t.showKey} accentColor={colors.accent}>
+            <button onClick={() => setShowKey(!showKey)}
               style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: colors.text, padding: 2, display: 'flex', alignItems: 'center' }}>
               {showKey ? <EyeSlash size={14} weight="bold" /> : <Eye size={14} weight="bold" />}
             </button>
+            </Tooltip>
           </div>
-          <button onClick={handleCopyKey} title={t.copyKey} style={{ ...iconBtnStyle(colors), width: 40, height: 40 }}>
+          <Tooltip key={colors.accent} content={t.copyKey} accentColor={colors.accent}>
+          <button onClick={handleCopyKey} style={{ ...iconBtnStyle(colors), width: 40, height: 40 }}>
             <Copy size={18} weight="bold" />
           </button>
-          <button onClick={handleClearKey} title={clearConfirm ? t.clearKeyConfirm : t.clearKey}
+          </Tooltip>
+          <Tooltip key={colors.accent} content={clearConfirm ? t.clearKeyConfirm : t.clearKey} accentColor={colors.accent}>
+          <button onClick={handleClearKey}
             style={{ ...iconBtnStyle(colors), width: 40, height: 40, color: clearConfirm ? colors.error : colors.text, borderColor: clearConfirm ? colors.error : colors.border }}>
             <Trash size={18} weight="bold" />
           </button>
+          </Tooltip>
         </div>
       </Field>
 

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Copy, CaretDown, CaretRight } from '@phosphor-icons/react';
+import { Copy, Sparkle, Check } from '@phosphor-icons/react';
 import type { AnalysisRecord } from '../../types';
-import { MODE_FIELD_CONFIGS, DEFAULT_EXPANDED } from './ModeFieldConfigs';
+import { MODE_FIELD_CONFIGS } from './ModeFieldConfigs';
+import Tooltip from '../common/Tooltip';
 
 interface DesignModeViewProps {
   record: AnalysisRecord;
@@ -12,24 +13,122 @@ interface DesignModeViewProps {
   t: Record<string, string>;
 }
 
-function DesignModeView({ record, lang, colors, fieldLabels, onCopy, t }: DesignModeViewProps) {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set(DEFAULT_EXPANDED));
-  const data = record.modeData as unknown as Record<string, unknown>;
+// ==========================================
+// 子组件：单行面板 (全部默认展开)
+// ==========================================
+const FieldItem = ({
+  label, text, isPrompt, isLast, colors, t, onCopy
+}: {
+  label: string; text: string;
+  isPrompt?: boolean; isLast: boolean;
+  colors: Record<string, string>; t: Record<string, string>;
+  onCopy: (text: string) => void;
+}) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
-  const toggle = (key: string) => {
-    setExpanded(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onCopy(text);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
+  // 鼠标悬浮时显示复制按钮
+  const showCopy = isHovered;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      {MODE_FIELD_CONFIGS.map((field) => {
+    <div
+      style={{
+        padding: '12px 0',
+        borderBottom: isLast ? 'none' : `1px solid ${colors.border}`,
+        transition: 'background-color 0.2s ease',
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* 标题栏 */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          color: colors.textHeader,
+          fontSize: 13,
+          fontWeight: 700,
+        }}
+      >
+        {/* Prompt 特殊标识 */}
+        {isPrompt && <Sparkle size={14} weight="fill" color={colors.accent} />}
+        
+        <span style={{ flex: 1 }}>{label}</span>
+
+        {/* 右侧复制按钮 */}
+        {showCopy && (
+          <Tooltip key={colors.accent} content={t.copy} accentColor={colors.accent}>
+          <button
+            onClick={handleCopy}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 4,
+              borderRadius: 6,
+              border: 'none',
+              backgroundColor: isCopied ? `${colors.success || colors.accent}20` : colors.grayBg,
+              color: isCopied ? (colors.success || colors.accent) : colors.text,
+              cursor: 'pointer',
+              opacity: isHovered || isCopied ? 1 : 0.4,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => { if (!isCopied) e.currentTarget.style.backgroundColor = `${colors.text}15`; }}
+            onMouseLeave={(e) => { if (!isCopied) e.currentTarget.style.backgroundColor = colors.grayBg; }}
+          >
+            {isCopied ? <Check size={14} weight="bold" /> : <Copy size={14} weight="bold" />}
+          </button>
+          </Tooltip>
+        )}
+      </div>
+
+      {/* 正文内容 */}
+      <div className="fade-in-fast"
+        style={{
+          marginTop: 8,
+          fontSize: 12,
+          color: colors.text,
+          lineHeight: 1.6,
+          whiteSpace: 'pre-wrap',
+        }}
+      >
+        {text}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 主组件
+// ==========================================
+function DesignModeView({ record, lang, colors, fieldLabels, onCopy, t }: DesignModeViewProps) {
+  const data = record.modeData as unknown as Record<string, unknown>;
+
+  // 过滤出有内容的字段
+  const fields = MODE_FIELD_CONFIGS.filter((field) => {
+    const value = data[field.key];
+    if (!value) return false;
+    if (typeof value === 'object' && 'zh' in (value as object)) {
+      const v = value as Record<string, string>;
+      return !!(v.zh || v.en);
+    }
+    if (typeof value === 'string') return !!value;
+    return false;
+  });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      {fields.map((field, index) => {
         const value = data[field.key];
-        const isExpanded = expanded.has(field.key);
+        const isLast = index === fields.length - 1;
         const label = fieldLabels[field.key] || field.key;
 
         let text = '';
@@ -41,53 +140,17 @@ function DesignModeView({ record, lang, colors, fieldLabels, onCopy, t }: Design
           text = value;
         }
 
-        if (!text) return null;
-
-        const bg = field.isPrompt ? `${colors.accent}08` : colors.grayBg;
-
         return (
-          <div key={field.key} style={{
-            borderRadius: 10, overflow: 'hidden',
-            border: `1px solid ${field.isPrompt ? `${colors.accent}30` : colors.border}`,
-            backgroundColor: bg,
-          }}>
-            <button
-              onClick={() => toggle(field.key)}
-              style={{
-                width: '100%', display: 'flex', alignItems: 'center', gap: 8,
-                padding: '10px 14px', border: 'none', background: 'none',
-                cursor: 'pointer', color: colors.textHeader,
-                fontSize: 12, fontWeight: 700,
-              }}
-            >
-              {isExpanded
-                ? <CaretDown size={14} weight="bold" color={field.isPrompt ? colors.accent : colors.text} />
-                : <CaretRight size={14} weight="bold" color={field.isPrompt ? colors.accent : colors.text} />
-              }
-              {label}
-              {field.isPrompt && (
-                <span style={{ fontSize: 9, color: colors.accent, marginLeft: 'auto' }}>Prompt</span>
-              )}
-            </button>
-            {isExpanded && (
-              <div style={{ padding: '0 14px 12px' }}>
-                <div style={{ fontSize: 12, color: colors.text, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
-                  {text}
-                </div>
-                <button
-                  onClick={() => onCopy(text)}
-                  style={{
-                    marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 4,
-                    padding: '3px 10px', borderRadius: 6, border: `1px solid ${colors.border}`,
-                    backgroundColor: 'transparent', color: colors.text,
-                    fontSize: 10, fontWeight: 600, cursor: 'pointer',
-                  }}
-                >
-                  <Copy size={12} weight="bold" /> {t.copy}
-                </button>
-              </div>
-            )}
-          </div>
+          <FieldItem
+            key={field.key}
+            label={label}
+            text={text}
+            isPrompt={field.isPrompt}
+            isLast={isLast}
+            colors={colors}
+            t={t}
+            onCopy={onCopy}
+          />
         );
       })}
     </div>

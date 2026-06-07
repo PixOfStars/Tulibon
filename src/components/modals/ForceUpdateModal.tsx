@@ -1,5 +1,5 @@
 import { DownloadSimple, RocketLaunch } from "@phosphor-icons/react";
-import type { AppTheme } from "../theme";
+import type { AppTheme } from "../../styles/theme";
 
 interface ForceUpdateModalProps {
 	theme: AppTheme;

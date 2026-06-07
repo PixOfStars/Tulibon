@@ -30,13 +30,9 @@ windows = { version = "0.59", features = [
   "Storage_Streams",
   "Globalization",
 ] }
-reqwest = { version = "0.12", features = ["stream"] }
+reqwest = { version = "0.12", features = [] }
 tokio = { version = "1", features = ["io-util", "fs"] }
-tokio-stream = "0.1"
-tokio-util = { version = "0.7", features = ["io"] }
-zip = "2"
-tempfile = "3"
-chrono = "0.4"
+thiserror = "2"
 
 [profile.release]
 opt-level = "s"

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { RocketLaunch, ChatCircleText, DownloadSimple } from '@phosphor-icons/react';
 import { Divider } from './SettingsField';
-import QrModal from './QrModal';
+import QrModal from '../modals/QrModal';
 import { tauriInvoke } from '../../utils/tauri';
 
 interface AboutTabProps {

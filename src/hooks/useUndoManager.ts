@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import type { AnalysisRecord } from '../../types';
+import type { AnalysisRecord } from '../types';
 
 export function useUndoManager() {
   const [undoData, setUndoData] = useState<{ prevHistory: AnalysisRecord[]; message: string } | null>(null);

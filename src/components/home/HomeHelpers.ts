@@ -1,4 +1,4 @@
-import type { AnalysisRecord, Tag, CropRect } from '../../types';
+import type { CropRect } from '../../types';
 
 export function doCrop(dataUrl: string, rect: CropRect): Promise<string> {
   return new Promise((resolve) => {
@@ -12,36 +12,6 @@ export function doCrop(dataUrl: string, rect: CropRect): Promise<string> {
       resolve(canvas.toDataURL());
     };
     img.src = dataUrl;
-  });
-}
-
-export function getModeDataSearchableText(md: Record<string, unknown>): string {
-  const parts: string[] = [];
-  for (const [, value] of Object.entries(md)) {
-    if (value && typeof value === 'object') {
-      if ('zh' in (value as object)) {
-        parts.push((value as Record<string, string>).zh);
-        parts.push((value as Record<string, string>).en);
-      } else if (Array.isArray(value) && typeof (value as unknown[])[0] === 'string') {
-        parts.push(...(value as string[]));
-      }
-    } else if (typeof value === 'string') {
-      parts.push(value);
-    }
-  }
-  return parts.join(' ').toLowerCase();
-}
-
-export function searchRecords(records: AnalysisRecord[], tags: Tag[], query: string): AnalysisRecord[] {
-  const q = query.toLowerCase().trim();
-  if (!q) return records;
-  return records.filter(r => {
-    if (r.summary.zh.toLowerCase().includes(q) || r.summary.en.toLowerCase().includes(q)) return true;
-    const allTagIds = [...r.systemTags, ...r.userTags];
-    const tagNames = allTagIds.map(tid => tags.find(t => t.id === tid)?.name);
-    if (tagNames.some(tn => tn && (tn.zh.toLowerCase().includes(q) || tn.en.toLowerCase().includes(q)))) return true;
-    if (getModeDataSearchableText(r.modeData as unknown as Record<string, unknown>).includes(q)) return true;
-    return false;
   });
 }
 

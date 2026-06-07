@@ -4,7 +4,6 @@
 
 import type { AnalysisMode } from "./models";
 import type { LocalizedText } from "./models";
-import type { OCREngine } from "./ocr";
 
 export type ProviderType = "gemini" | "openai" | "custom";
 
@@ -15,14 +14,6 @@ export interface ProviderConfig {
 	endpoint: string;
 	model: string;
 	enabled: boolean;
-}
-
-export interface ShortcutBindings {
-	clipboardRead: string;
-	toggleWindow: string;
-	copyResult: string;
-	switchLang: string;
-	analyze: string;
 }
 
 // ── Mode & style presets ──
@@ -109,16 +100,11 @@ export interface AppConfig {
 	analysisStyle: string;
 	modeProfiles: ModeProfile[];
 	stylePresets: StylePreset[];
-	customFontPath: string;
 	fontSize: "small" | "medium" | "large";
-	shortcuts: ShortcutBindings;
 	dataDir: string;
 	defaultAnalysisMode: string;
 	exportFormat: "md" | "txt";
 	quickSave: boolean;
 	sidebarWidth: number;
-  sidebarOrder: string[];
-	ocrEngine: OCREngine;
-	ocrEngineDownloaded: Record<OCREngine, boolean>;
-	ocrCustomDownloadUrl: string;
+	sidebarOrder: string[];
 }

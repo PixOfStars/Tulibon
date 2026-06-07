@@ -1,8 +1,8 @@
 import { useCallback, useRef } from 'react';
-import type { AnalysisRecord, AnalysisResult, ImageSource, Tag, CropRect, ProviderConfig, ModeProfile, StylePreset } from '../../types';
-import { analyzeImage } from '../../api';
-import { generateId, saveImageToDisk } from '../../utils/helpers';
-import { doCrop } from './HomeHelpers';
+import type { AnalysisRecord, AnalysisResult, ImageSource, Tag, CropRect, ProviderConfig, ModeProfile, StylePreset } from '../types';
+import { analyzeImage } from '../api';
+import { generateId, saveImageToDisk } from '../utils/helpers';
+import { doCrop } from '../components/home/HomeHelpers';
 
 interface UseAnalysisProps {
   activeProviderConfig: ProviderConfig;

@@ -1,0 +1,119 @@
+/* ==========================================
+   1. Reset & Base (基础重置与全局样式)
+   ========================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  /* 进阶优化：优先使用 React 注入的主题背景色，如果未加载则回退到 #1A1A1D */
+  background: var(--bg, #1A1A1D);
+}
+
+input, textarea, button {
+  font-family: inherit;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+}
+
+/* ==========================================
+   2. Scrollbar (滚动条美化)
+   ========================================== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  /* 进阶优化：使用主题色边框变量作为滚动条颜色，更柔和且跟随主题 */
+  background: var(--border, rgba(128, 128, 128, 0.3));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  /* 悬浮时颜色加深，同样优先使用主题变量 */
+  background: var(--text, rgba(128, 128, 128, 0.5));
+}
+
+/* ==========================================
+   3. Keyframes (动画关键帧)
+   ========================================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInFast {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bounceLetter {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-8px); }
+  60% { transform: translateY(0); }
+}
+
+/* ==========================================
+   4. Utility Classes (常用动画工具类)
+   ========================================== */
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.fade-in-fast {
+  animation: fadeInFast 0.2s ease-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.25s ease-out;
+}
+
+/* ==========================================
+   5. Components (特定组件样式)
+   ========================================== */
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 进阶优化：确保遮罩层颜色也能跟随主题配置 */
+  background: var(--overlay, rgba(0, 0, 0, 0.5));
+  animation: fadeIn 0.2s ease-out;
+}

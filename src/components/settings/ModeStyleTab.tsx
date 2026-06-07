@@ -4,7 +4,7 @@ import type { ModeProfile, StylePreset, AnalysisMode } from '../../types';
 import { Field, inputStyle, iconBtnStyle } from './SettingsField';
 import { generateId } from '../../utils/helpers';
 import type { TabProps } from './TabProps';
-import Dropdown from '../Dropdown';
+import Dropdown from '../common/Dropdown';
 
 const MODE_TYPE_LABELS: Record<AnalysisMode, { zh: string; en: string }> = {
   design: { zh: '设计分析', en: 'Design Analysis' },

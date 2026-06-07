@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useCropHandlers } from "../components/home/useCropHandlers";
+import { useCropHandlers } from "./useCropHandlers";
 import CropPanel from "../components/home/CropPanel";
 import type { CropRect } from "../types";
 

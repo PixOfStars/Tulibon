@@ -43,7 +43,7 @@ const CropPanel = ({
 
         <div ref={cropRef} style={{ position: 'relative', cursor: 'crosshair', userSelect: 'none' }}
           onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp}>
-          <img src={cropImage} alt="" style={{ width: '100%', display: 'block' }} draggable={false} />
+          <img src={cropImage} alt="" style={{ width: '100%', maxHeight: '60vh', objectFit: 'contain', display: 'block' }} draggable={false} />
 
           {/* X close button top-right */}
           <button onClick={onCancel}

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import type { AnalysisRecord, Tag } from '../../types';
+import type { AnalysisRecord, Tag } from '../types';
 
 export function useTagManagement(
   records: AnalysisRecord[],

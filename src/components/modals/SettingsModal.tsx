@@ -5,27 +5,24 @@ import {
 	ImageSquare,
 	Wrench,
 	Palette,
-	Command,
 	Sliders,
 	X,
 } from "@phosphor-icons/react";
-import type { ProviderConfig, AppConfig } from "../types";
-import type { AppTheme } from "../theme";
-import { useToast } from "./Toast";
-import { SETTINGS_MODAL_WIDTH } from "../styles";
-import { tauriInvoke } from "../utils/tauri";
-import ProviderTab from "./settings/ProviderTab";
-import InputTab from "./settings/InputTab";
-import GeneralTab from "./settings/GeneralTab";
-import AppearanceTab from "./settings/AppearanceTab";
-import ShortcutsTab from "./settings/ShortcutsTab";
-import ModeStyleTab from "./settings/ModeStyleTab";
-import OcrTab from "./settings/OcrTab";
-import { getT } from "../utils/i18n";
-import type zh from "../locales/zh.json";
+import type { ProviderConfig, AppConfig } from "../../types";
+import type { AppTheme } from "../../styles/theme";
+import { useToast } from "../common/Toast";
+import { SETTINGS_MODAL_WIDTH } from "../../styles/styles";
+import { tauriInvoke } from "../../utils/tauri";
+import ProviderTab from "../settings/ProviderTab";
+import InputTab from "../settings/InputTab";
+import GeneralTab from "../settings/GeneralTab";
+import AppearanceTab from "../settings/AppearanceTab";
+import ModeStyleTab from "../settings/ModeStyleTab";
+import { getT } from "../../utils/i18n";
+import type zh from "../../locales/zh.json";
 
 interface SettingsModalProps {
-	prefs: ReturnType<typeof import("../hooks/usePreferences").usePreferences>;
+	prefs: ReturnType<typeof import("../../hooks/usePreferences").usePreferences>;
 	theme: AppTheme;
 	onClose: () => void;
 }
@@ -35,9 +32,7 @@ type Tab =
 	| "modeStyle"
 	| "input"
 	| "general"
-	| "appearance"
-	| "shortcuts"
-	| "ocr";
+	| "appearance";
 
 const tabItems: { key: Tab; icon: typeof Key; i18nKey: keyof typeof zh }[] = [
 	{ key: "provider", icon: Key, i18nKey: "aiProviderTab" },
@@ -45,7 +40,6 @@ const tabItems: { key: Tab; icon: typeof Key; i18nKey: keyof typeof zh }[] = [
 	{ key: "input", icon: ImageSquare, i18nKey: "inputTab" },
 	{ key: "general", icon: Wrench, i18nKey: "generalTab" },
 	{ key: "appearance", icon: Palette, i18nKey: "appearanceTab" },
-	{ key: "shortcuts", icon: Command, i18nKey: "shortcutsTab" },
 ];
 
 const SettingsModal = ({ prefs, theme, onClose }: SettingsModalProps) => {
@@ -58,9 +52,6 @@ const SettingsModal = ({ prefs, theme, onClose }: SettingsModalProps) => {
 	const [activeTab, setActiveTab] = useState<Tab>("provider");
 
 	const [editingProvider, setEditingProvider] = useState(0);
-	const [capturingShortcut, setCapturingShortcut] = useState<string | null>(
-		null,
-	);
 
 	const saveConfig = useCallback(
 		(newConfig: AppConfig) => {
@@ -86,45 +77,6 @@ const SettingsModal = ({ prefs, theme, onClose }: SettingsModalProps) => {
 		} catch (e) {
 			console.warn("pick_folder failed:", e);
 		}
-	};
-
-	const handleSelectFont = async () => {
-		try {
-			const file = await tauriInvoke("pick_font_file");
-			if (file) {
-				saveConfig({ ...config, customFontPath: file as string });
-				const style = document.createElement("style");
-				style.textContent = `@font-face { font-family: 'CustomAppFont'; src: url('${file}'); }`;
-				document.head.appendChild(style);
-				toast.show(t.restartRequired);
-			}
-		} catch (e) {
-			console.warn("pick_font_file failed:", e);
-		}
-	};
-
-	const handleShortcutCapture = (configKey: string, e: React.KeyboardEvent) => {
-		e.preventDefault();
-		const keys: string[] = [];
-		if (e.ctrlKey) keys.push("Ctrl");
-		if (e.altKey) keys.push("Alt");
-		if (e.shiftKey) keys.push("Shift");
-		const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
-		if (!["Control", "Alt", "Shift"].includes(key)) {
-			keys.push(key);
-			saveConfig({
-				...config,
-				shortcuts: { ...config.shortcuts, [configKey]: keys.join("+") },
-			});
-			setCapturingShortcut(null);
-		}
-	};
-
-	const updateShortcut = (configKey: string, value: string) => {
-		saveConfig({
-			...config,
-			shortcuts: { ...config.shortcuts, [configKey]: value },
-		});
 	};
 
 	const tabProps = {
@@ -273,19 +225,8 @@ const SettingsModal = ({ prefs, theme, onClose }: SettingsModalProps) => {
 						{activeTab === "general" && (
 							<GeneralTab {...tabProps} onSelectFolder={handleSelectFolder} />
 						)}
-						{activeTab === "appearance" && (
-							<AppearanceTab {...tabProps} onSelectFont={handleSelectFont} />
-						)}
-						{activeTab === "shortcuts" && (
-							<ShortcutsTab
-								{...tabProps}
-								capturingShortcut={capturingShortcut}
-								setCapturingShortcut={setCapturingShortcut}
-								onCapture={handleShortcutCapture}
-								onClear={(k) => updateShortcut(k, "")}
-							/>
-						)}
-						{activeTab === "ocr" && <OcrTab {...tabProps} />}
+						{activeTab === "appearance" && <AppearanceTab {...tabProps} />}
+
 					</div>
 				</div>
 			</div>

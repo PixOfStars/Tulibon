@@ -1,8 +1,9 @@
 import { List, Minus, Square, X } from "@phosphor-icons/react";
-import type { AppTheme } from "../theme";
-import { TITLE_BAR_HEIGHT, SIDEBAR_TOGGLE_SIZE } from "../styles";
-import { tauriInvoke } from "../utils/tauri";
-import { getT } from "../utils/i18n";
+import type { AppTheme } from "../../styles/theme";
+import { TITLE_BAR_HEIGHT, SIDEBAR_TOGGLE_SIZE } from "../../styles/styles";
+import { tauriInvoke } from "../../utils/tauri";
+import { getT } from "../../utils/i18n";
+import Tooltip from "../common/Tooltip";
 
 interface TitleBarProps {
 	theme: AppTheme;
@@ -49,9 +50,9 @@ const TitleBar = ({
 					} as React.CSSProperties
 				}
 			>
+				<Tooltip key={colors.accent} content={sidebarCollapsed ? t.sidebarExpand : t.sidebarCollapse} accentColor={colors.accent}>
 				<button
 					onClick={onToggleSidebar}
-					title={sidebarCollapsed ? t.sidebarExpand : t.sidebarCollapse}
 					style={
 						{
 							width: SIDEBAR_TOGGLE_SIZE,
@@ -78,6 +79,7 @@ const TitleBar = ({
 				>
 					<List size={22} weight="bold" />
 				</button>
+				</Tooltip>
 
 				<div
 					style={{
@@ -142,6 +144,7 @@ const TitleBar = ({
 				>
 					<Minus size={14} weight="bold" />
 				</button>
+
 				<button
 					onClick={handleToggleMaximize}
 					onMouseDown={(e) => e.stopPropagation()}
@@ -173,6 +176,7 @@ const TitleBar = ({
 				>
 					<Square size={12} weight="bold" />
 				</button>
+
 				<button
 					onClick={handleClose}
 					onMouseDown={(e) => e.stopPropagation()}
@@ -204,6 +208,7 @@ const TitleBar = ({
 				>
 					<X size={16} weight="bold" />
 				</button>
+
 			</div>
 		</div>
 	);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { loadImageFromDisk } from '../utils/helpers';
+import { loadImageFromDisk } from '../../utils/helpers';
 
 interface DiskImageProps {
   path: string;
