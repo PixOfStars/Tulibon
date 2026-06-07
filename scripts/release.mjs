@@ -118,7 +118,14 @@ try {
   changelog = `- Release ${newVer}`;
 }
 
-// ── Step 2: Build ──
+// ── Step 2: Pre-clean deps cache ──
+const depsDir = join(root, 'src-tauri', 'target', 'release', 'deps');
+if (existsSync(depsDir)) {
+  rmSync(depsDir, { recursive: true, force: true });
+  console.log('🧹 Pre-cleaned target/release/deps/\n');
+}
+
+// ── Step 3: Build ──
 console.log('🔨 Building...\n');
 exec('npx tsc -b && npx vite build');
 exec('npx tauri build', {
